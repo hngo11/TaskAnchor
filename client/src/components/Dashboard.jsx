@@ -1,14 +1,37 @@
 
-import { Container, Form, Navbar, Row, Button } from 'react-bootstrap';
+import { Container, Form, Navbar, Row, Button, Table } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 function Dashboard() {
 
+    const [tickets, setTickets] = useState([]);
+    const [loading, setLoading] = useState(true)
+    const ticketsURL = "http://localhost:3000/api/alltickets"
     const navigate = useNavigate()
 
     const onSubmit = async () => {
         navigate("/CreateTicket")
     }
+
+    useEffect(()=>{
+
+        const getTickets = async ()=>{
+            try{
+                const response = await fetch(ticketsURL)
+                const data = await response.json()
+                setTickets(data)
+        
+            }
+            catch(err){console.log(err)}
+            finally{
+                setLoading(false)
+            }
+        }
+        getTickets()
+        console.log(tickets)
+    },[])
+
 
     return (
         <div className="page-background d-flex flex-column min-vh-100 text-black">
@@ -25,11 +48,66 @@ function Dashboard() {
                     <h1>User Dashboard</h1>
                     </div>
                 </Row>
-                <Button className="mt-3 mx-3" variant="primary" type="button" onClick={onSubmit}>
+                <Container className="d-flex mb-3 justify-content-end">
+                <Button className="d-flex mt-3 mx-3 " variant="primary" type="button" onClick={onSubmit}>
                     Open New Ticket
                 </Button> 
-                </Form>  
+                </Container>
+                <br/><br/><br/>
+                </Form>
+                <div className="my-1">
+                    <h2>All Tickets</h2>
+                </div>
+        <Table responsive="sm" className="border border-3">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Discription</th>
+            <th>Creation Date</th>
+            <th>Assigned</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+            {tickets.map((ticket) => (
+                <tr key={tickets._id}>
+                    <td className="w-25" onClick={()=>navigate(`/View/${ticket._id}`)}>{ticket.title}</td>
+                    <td className="w-25">{ticket.description}</td>
+                    <td>{ticket.date}</td>
+                    <td>{ticket.assigned}</td>
+                    <td>{ticket.status}</td>
+                </tr>
+                ))}
+          </tbody>
+          </Table>
+            <br/><br/><br/>
+                 <div className="my-1">
+                    <h2>My Tickets</h2>
+                </div>
+        <Table responsive="sm" className="border border-3">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Discription</th>
+            <th>Creation Date</th>
+            <th>Assigned</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+            {tickets.map((ticket) => (
+                    <tr key={tickets._id}>
+                        <td className="w-25">{ticket.title}</td>
+                        <td className="w-25">{ticket.description}</td>
+                        <td>{ticket.date}</td>
+                        <td>{ticket.assigned}</td>
+                        <td>{ticket.status}</td>
+                    </tr>
+                    ))}
+          </tbody>
+          </Table>
             </Container>
+           
     </div>);    
 
   

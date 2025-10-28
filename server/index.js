@@ -60,6 +60,34 @@ app.post("/api/createTicket", async (req,res)=>{
     catch(err){console.log(err)}    
 })
 
+app.get("/api/allUsers", async (req,res)=>{
+
+    const users = await Users.find({})
+
+    res.json(users)
+    console.log(users)
+
+})
+
+app.get("/api/allTickets", async (req,res)=>{
+
+
+    const tickets = await Tickets.find({})
+
+    res.json(tickets.reverse())
+    console.log(tickets)
+
+})
+
+app.get("/api/view/:ticketID", async (req,res)=>{
+
+    const ticketID = req.params.ticketID
+    const ticket = await Tickets.findOne({_id:ticketID})
+    return res.json({"ticketData":JSON.stringify(ticket)})
+
+})
+
+
 async function serverStart(){
     try {
         await mongoose.connect(process.env.MONGODB_URI)

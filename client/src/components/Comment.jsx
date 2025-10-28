@@ -1,20 +1,19 @@
-
-import { Container, Form, Navbar, Row, Button } from 'react-bootstrap';
-import { useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
+import { Container, Form, Navbar, Row, Button, Spinner } from 'react-bootstrap';
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
-function CreateTicket() {
+function Comment() {
 
-  const URL = "http://localhost:3000/api/createTicket"
-  const userURL = "http://localhost:3000/api/allusers"
-  const navigate = useNavigate()
+const baseURL = "http://localhost:3000/api/view/"
+  
+const navigate = useNavigate()
 
-  const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [loading, setLoading] = useState(true)
-  const [users, setUsers] = useState([])
-  const [assigned, setAssigned] = useState("")
+  const [ticket, setTicket] = useState()
+  const {ticketID} = useParams()
+  
 
   
   const onCancel = async () => {
@@ -23,20 +22,23 @@ function CreateTicket() {
 
     useEffect(()=>{
 
-    const getUsers = async ()=>{
-        try{
-            const response = await fetch(userURL)
-            const users = await response.json()
-            setUsers(users)
-            
+        console.log(baseURL+ticketID)
+
+        const getTicket = async ()=>{
+            try{
+                const response = await fetch(baseURL+ticketID)
+                const data = await response.json()
+                setTicket(JSON.parse(data.ticketData))
+                
+            }
+            catch(err){console.log(err)}
+            finally{
+                setLoading(false)
+            }
         }
-        catch(err){console.log(err)}
-        finally{
-            setLoading(false)
-        }
-    }
-    getUsers()
+        getTicket()
     },[])
+
 
 
    const onSubmit = async () => {
@@ -79,7 +81,15 @@ function CreateTicket() {
   }
 
 
-    return (
+    return (<>
+        {loading?(
+            <Container className="d-flex justify-content-center align-items-center min-vh-100">
+                <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </Spinner>
+             </Container>):
+            (
+                       
         <div className="page-background d-flex flex-column min-vh-100 text-black">
         <Navbar expand="lg" style={{ backgroundColor: '#80E6FF' }}>
             <Container>
@@ -91,45 +101,13 @@ function CreateTicket() {
             <Form onSubmit={onSubmit}>
             <Row>
                 <div className="my-4 pb-2 border-bottom">
-                <h1>Open New Ticket</h1>
+                <h1>Update Log</h1>
                 </div>
             </Row>
-            <Row>
-                <Form.Group className=" mb-3 w-50" controlId="name">
-                    <Form.Label>Issue Name</Form.Label>
-                    <Form.Control
-                    required
-                    className='border border-dark border-1'
-                    type="text" 
-                    value={title}
-                    onChange={(e)=>setTitle(e.target.value)}
-                    placeholder="Subject"/>
-                    <Form.Control.Feedback type="invalid">
-                        Cannot be empty.
-                    </Form.Control.Feedback>                   
-                </Form.Group>
-            </Row>
-            <Row>
-              <Form.Group className=" mb-3 w-25" controlId="assign">
-                    <Form.Label>Assign to</Form.Label>
-                <Row>
-            <Form.Select
-                value={assigned} 
-                onChange={(e)=>setAssigned(e.target.value)}
-                aria-label="Default select example">
-                <option></option>
-                    {users.map((user) => (
-                    <option key={user._id} value={user.email}>
-                        {user.email}
-                    </option>
-                ))} 
-            </Form.Select>         
-                </Row>
-              </Form.Group>
-            </Row>
-            <Row>
-              <Form.Group className="mb-3" controlId="info">
-                    <Form.Label>Description</Form.Label>
+                  
+            <Row>  
+                <Form.Group className="mb-3" controlId="info">
+                    <Form.Label>Add Comment</Form.Label>
                     <Form.Control
                     required
                     className='border border-dark border-1'
@@ -137,22 +115,23 @@ function CreateTicket() {
                     rows={4} 
                     value={description}
                     onChange={(e)=>setDescription(e.target.value)}
-                    placeholder="Provide a Brief Description"/>
+                    placeholder="Comment Here..."/>
                     <Form.Control.Feedback type="invalid">
                         Cannot be empty.
                     </Form.Control.Feedback>            
-                </Form.Group>  
+                </Form.Group>       
             </Row>
             <Button className="mt-3 mx-4 btn-outline-primary" variant="secondary" type="button" onClick={onCancel}>
                 Cancel
             </Button>
             <Button className="mt-3 mx-3" variant="primary" type="button" onClick={onSubmit}>
-                Submit
+                Update
             </Button> 
             </Form>  
         </Container>
-    </div>);
+    </div>)}  
+    </>)   
 
 }
 
-export default CreateTicket;
+export default Comment;
