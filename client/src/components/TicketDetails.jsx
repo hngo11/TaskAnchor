@@ -130,7 +130,7 @@ function TicketDetails() {
                     <h3>Logs</h3>
                 </div>
                 <Row>
-                    <ListGroup numbered className="py-0">
+                    <ListGroup className="py-0">
                         {ticket.logs.map((item,index) => (
                         <ListGroup.Item className="py-0" key={index}>
                             {item}

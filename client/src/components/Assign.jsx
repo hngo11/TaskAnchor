@@ -5,7 +5,8 @@ import { jwtDecode } from "jwt-decode";
 
 function Assign() {
 
-  const baseURL = "http://localhost:3000/api/view/"
+  const ticketURL = "http://localhost:3000/api/view/"
+  const updateURL = "http://localhost:3000/api/update/"
   const userURL = "http://localhost:3000/api/allusers"
   
   const navigate = useNavigate()
@@ -25,28 +26,21 @@ function Assign() {
     useEffect(()=>{
 
         const getUsers = async ()=>{
-        try{
-            const response = await fetch(userURL)
-            const users = await response.json()
-            setUsers(users)
-            
-        }
+            try{
+                const response = await fetch(userURL)
+                const users = await response.json()
+                setUsers(users)
+                
+            }
         catch(err){console.log(err)}
-        finally{
-            setLoading(false)
         }
-    }
-    getUsers()
-    },[])
+        getUsers()
 
- 
-    useEffect(()=>{
-
-        console.log(baseURL+ticketID)
+        console.log(ticketURL+ticketID)
 
         const getTicket = async ()=>{
             try{
-                const response = await fetch(baseURL+ticketID)
+                const response = await fetch(ticketURL+ticketID)
                 const data = await response.json()
                 setTicket(JSON.parse(data.ticketData))
                 
@@ -57,6 +51,7 @@ function Assign() {
             }
         }
         getTicket()
+        
     },[])
 
     useEffect(()=>{
@@ -67,35 +62,25 @@ function Assign() {
 
    const onSubmit = async () => {
     
-     
-     let status = "In Progress"
+    let status = "In Progress"
 
-     const token = localStorage.getItem("token")
-    if(token != null){
-       author = jwtDecode(token).user
-        console.log(author)
-     }
-
-     try{
-        let response = await fetch(URL,{
-          method:"POST",
-          headers:{
-              "content-type":"application/json"
-          },
-          body:JSON.stringify({title, author, date, assigned, status, description,logs})
-        })
+    try {  
+        const response = await fetch(updateURL+ticketID, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({assigned, status}),
+      });
         const data = await response.json()
         if(response.ok){
           navigate("/Dashboard")
         }
         else{
-          alert(data.msg || "Issue Creation failed!")
+          alert(data.msg || "Update unsuccessful")
         }
       }
-      catch(err)
-      {
-        console.log(err)
-      }
+      catch(err){console.log(err)}
   }
 
 

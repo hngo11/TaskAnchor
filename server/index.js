@@ -11,7 +11,7 @@ const Tickets = require("./model/Tickets")
 dotenv.config()
 const app = express()
 app.use(express.json({limit:'5mb'}))
-app.use(cors())
+app.use(cors());
 
 app.post("/api/auth/login", async (req,res)=>{
     const {username, password} = req.body
@@ -86,6 +86,26 @@ app.get("/api/view/:ticketID", async (req,res)=>{
     return res.json({"ticketData":JSON.stringify(ticket)})
 
 })
+
+app.patch("/api/update/:ticketID", async (req, res) => {
+    try {
+        const ticketID = req.params.ticketID;
+        const updateFields = req.body;
+        console.log(updateFields)
+        const updatedItem = await Tickets.findByIdAndUpdate(
+            ticketID,
+            {$set: updateFields},
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedItem) {
+            return res.status(404).json({ message: 'Ticket not found' });
+        }
+
+        res.status(200).json(updatedItem);
+    }
+    catch(err){console.log(err)}
+});
 
 
 async function serverStart(){

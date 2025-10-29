@@ -53,7 +53,7 @@ function Dashboard() {
                     Open New Ticket
                 </Button> 
                 </Container>
-                <br/><br/><br/>
+                <br/>
                 </Form>
                 <div className="my-1">
                     <h2>All Tickets</h2>
