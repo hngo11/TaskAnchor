@@ -17,6 +17,7 @@ app.post("/api/auth/login", async (req,res)=>{
     const {username, password} = req.body
 
     try{
+
         let user = await Users.findOne({username})
         if(!user) return res.status(401).json({"msg":"Wrong username or password"})
 
@@ -30,7 +31,9 @@ app.post("/api/auth/login", async (req,res)=>{
 })
 
 app.post("/api/auth/register", async (req,res)=>{
+
     try{
+
         const {username, email, password} = req.body
         let user = await Users.findOne({username})
 
@@ -62,29 +65,43 @@ app.post("/api/createTicket", async (req,res)=>{
 
 app.get("/api/allUsers", async (req,res)=>{
 
-    const users = await Users.find({})
-
-    res.json(users)
-    console.log(users)
-
+    try{
+        const users = await Users.find({})
+        console.log(users)
+        return res.status(200).json(users)
+    }
+    catch(err){console.log(err)}   
 })
 
 app.get("/api/allTickets", async (req,res)=>{
 
+    try{
+        const tickets = await Tickets.find({})
+        console.log(tickets)
+        return res.status(200).json(tickets.reverse())
+     }
+    catch(err){console.log(err)}   
 
-    const tickets = await Tickets.find({})
+})
 
-    res.json(tickets.reverse())
-    console.log(tickets)
+app.get("/api/userInfo", async (req,res)=>{
 
+    try{
+        const user = await Users.findOne()
+        console.log(user)
+        return res.status(200).json(user)
+    }
+    catch(err){console.log(err)}   
 })
 
 app.get("/api/view/:ticketID", async (req,res)=>{
 
-    const ticketID = req.params.ticketID
-    const ticket = await Tickets.findOne({_id:ticketID})
-    return res.json({"ticketData":JSON.stringify(ticket)})
-
+    try {
+        const ticketID = req.params.ticketID
+        const ticket = await Tickets.findOne({_id:ticketID})
+        return res.status(200).json({"ticketData":JSON.stringify(ticket)})
+    }   
+    catch(err){console.log(err)}
 })
 
 app.patch("/api/update/:ticketID", async (req, res) => {
@@ -101,7 +118,6 @@ app.patch("/api/update/:ticketID", async (req, res) => {
         if (!updatedItem) {
             return res.status(404).json({ message: 'Ticket not found' });
         }
-
         res.status(200).json(updatedItem);
     }
     catch(err){console.log(err)}

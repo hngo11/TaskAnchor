@@ -74,7 +74,7 @@ function Assign() {
       });
         const data = await response.json()
         if(response.ok){
-          navigate("/Dashboard")
+          navigate(-1)
         }
         else{
           alert(data.msg || "Update unsuccessful")

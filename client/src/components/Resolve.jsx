@@ -5,13 +5,15 @@ import { jwtDecode } from "jwt-decode";
 
 function ResolveTicket() {
 
-const baseURL = "http://localhost:3000/api/view/"
+  const ticketURL = "http://localhost:3000/api/view/"
+  const updateURL = "http://localhost:3000/api/update/"
   
-const navigate = useNavigate()
+    const navigate = useNavigate()
 
-  const [description, setDescription] = useState("")
+
   const [loading, setLoading] = useState(true)
   const [ticket, setTicket] = useState()
+  const [log, setLog] = useState("")
   const {ticketID} = useParams()
   
 
@@ -19,17 +21,14 @@ const navigate = useNavigate()
   const onCancel = async () => {
         navigate(-1)
   }
-
-    useEffect(()=>{
-
-        console.log(baseURL+ticketID)
+    
+   useEffect(()=>{
 
         const getTicket = async ()=>{
             try{
-                const response = await fetch(baseURL+ticketID)
+                const response = await fetch(ticketURL+ticketID)
                 const data = await response.json()
-                setTicket(JSON.parse(data.ticketData))
-                
+                setTicket(JSON.parse(data.ticketData))   
             }
             catch(err){console.log(err)}
             finally{
@@ -37,47 +36,32 @@ const navigate = useNavigate()
             }
         }
         getTicket()
+       
     },[])
-
-
 
    const onSubmit = async () => {
     
-     let date = new Date().toString()
-     let status = "New"
-     let logs = []
-     let author = "Unknown"
+    let status = "Resolved"
 
-     const token = localStorage.getItem("token")
-    if(token != null){
-       author = jwtDecode(token).user
-        console.log(author)
-     }
+    const logs = [...ticket.logs,log]
 
-     if (assigned == null)
-        console.log(assigned)
-        setAssigned(author)
-
-     try{
-        let response = await fetch(URL,{
-          method:"POST",
-          headers:{
-              "content-type":"application/json"
-          },
-          body:JSON.stringify({title, author, date, assigned, status, description,logs})
-        })
+    try {  
+        const response = await fetch(updateURL+ticketID, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({logs, status}),
+      });
         const data = await response.json()
         if(response.ok){
-          navigate("/Dashboard")
+          navigate(-1)
         }
         else{
-          alert(data.msg || "Issue Creation failed!")
+          alert(data.msg || "Update unsuccessful")
         }
       }
-      catch(err)
-      {
-        console.log(err)
-      }
+      catch(err){console.log(err)}
   }
 
 
@@ -113,8 +97,8 @@ const navigate = useNavigate()
                     className='border border-dark border-1'
                     as="textarea"
                     rows={4} 
-                    value={description}
-                    onChange={(e)=>setDescription(e.target.value)}
+                    value={log}
+                    onChange={(e)=>setLog(e.target.value)}
                     placeholder="Comment Here..."/>
                     <Form.Control.Feedback type="invalid">
                         Cannot be empty.

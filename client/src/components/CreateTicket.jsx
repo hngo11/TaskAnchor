@@ -110,7 +110,7 @@ function CreateTicket() {
                 </Form.Group>
             </Row>
             <Row>
-              <Form.Group className=" mb-3 w-25" controlId="assign">
+              <Form.Group className=" mb-3 mx-3 w-25" controlId="assign">
                     <Form.Label>Assign to</Form.Label>
                 <Row>
             <Form.Select
@@ -128,7 +128,7 @@ function CreateTicket() {
               </Form.Group>
             </Row>
             <Row>
-              <Form.Group className="mb-3" controlId="info">
+              <Form.Group className="mb-3 w-75" controlId="info">
                     <Form.Label>Description</Form.Label>
                     <Form.Control
                     required

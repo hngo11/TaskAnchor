@@ -67,7 +67,7 @@ function TicketDetails() {
                 </Button> 
             </Container>
             <Container className="d-flex mb-3 justify-content-end">
-                <Button className="w-25" variant="primary" type="button" onClick={()=>navigate(`/Resolve/${ticket._id}`)}>
+                <Button  variant="primary" type="button" onClick={()=>navigate(`/Resolve/${ticket._id}`)}>
                     Resolve
                 </Button>
             </Container>

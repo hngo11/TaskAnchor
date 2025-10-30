@@ -8,7 +8,7 @@ function Comment() {
   const ticketURL = "http://localhost:3000/api/view/"
   const updateURL = "http://localhost:3000/api/update/"
   
-const navigate = useNavigate()
+    const navigate = useNavigate()
 
 
   const [loading, setLoading] = useState(true)
