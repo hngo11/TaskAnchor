@@ -15,6 +15,10 @@ const usersSchema = mongoose.Schema({
         type:String,
         required:true
     },
+    isAdmin:{
+        type:Boolean,
+        required:true
+    },
 })
 
 const Users = mongoose.model('Users',usersSchema)

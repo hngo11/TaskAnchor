@@ -10,9 +10,12 @@ const ticketSchema = mongoose.Schema({
         type:String,
         required:true
     },
-    date: { 
+    creationDate: { 
         type:String,
         required:true
+    },
+    resolutionDate: { 
+        type:String,
     },
     assigned:{
         type:String,

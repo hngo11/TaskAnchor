@@ -1,26 +1,25 @@
 import { Container, Form, Navbar, Row, Button, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
+import NavBar from './NavBar.jsx';
+import Footer from './Footer.jsx';
 
 function ResolveTicket() {
 
-  const ticketURL = "http://localhost:3000/api/view/"
-  const updateURL = "http://localhost:3000/api/update/"
-  
+    const ticketURL = "http://localhost:3000/api/view/"
+    const updateURL = "http://localhost:3000/api/update/"
+
     const navigate = useNavigate()
 
-
-  const [loading, setLoading] = useState(true)
-  const [ticket, setTicket] = useState()
-  const [log, setLog] = useState("")
-  const {ticketID} = useParams()
+    const [ticket, setTicket] = useState()
+    const [log, setLog] = useState("")
+    const [loading, setLoading] = useState(true)
+    const {ticketID} = useParams()
   
 
-  
-  const onCancel = async () => {
+    const onCancel = async () => {
         navigate(-1)
-  }
+    }
     
    useEffect(()=>{
 
@@ -40,7 +39,8 @@ function ResolveTicket() {
     },[])
 
    const onSubmit = async () => {
-    
+
+    let resolutionDate = new Date().toString()
     let status = "Resolved"
 
     const logs = [...ticket.logs,log]
@@ -51,7 +51,7 @@ function ResolveTicket() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({logs, status}),
+        body: JSON.stringify({status,resolutionDate,logs}),
       });
         const data = await response.json()
         if(response.ok){
@@ -72,48 +72,43 @@ function ResolveTicket() {
                     <span className="visually-hidden">Loading...</span>
                 </Spinner>
              </Container>):
-            (
-                       
-        <div className="page-background d-flex flex-column min-vh-100 text-black">
-        <Navbar expand="lg" style={{ backgroundColor: '#80E6FF' }}>
-            <Container>
-                <Navbar.Brand className="fs-4 fw-bold" href="/">TaskAnchor</Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            </Container>
-        </Navbar>    
-        <Container className="flex-grow-1 mt-3">
-            <Form onSubmit={onSubmit}>
-            <Row>
-                <div className="my-4 pb-2 border-bottom">
-                <h1>Ticket Resolution</h1>
-                </div>
-            </Row>
-                  
-            <Row>  
-                <Form.Group className="mb-3" controlId="info">
-                    <Form.Label>Resolution</Form.Label>
-                    <Form.Control
-                    required
-                    className='border border-dark border-1'
-                    as="textarea"
-                    rows={4} 
-                    value={log}
-                    onChange={(e)=>setLog(e.target.value)}
-                    placeholder="Comment Here..."/>
-                    <Form.Control.Feedback type="invalid">
-                        Cannot be empty.
-                    </Form.Control.Feedback>            
-                </Form.Group>       
-            </Row>
-            <Button className="mt-3 mx-4 btn-outline-primary" variant="secondary" type="button" onClick={onCancel}>
-                Cancel
-            </Button>
-            <Button className="mt-3 mx-3" variant="primary" type="button" onClick={onSubmit}>
-                Close Ticket
-            </Button> 
-            </Form>  
-        </Container>
-    </div>)}  
+            (            
+            <div className="page-background d-flex flex-column min-vh-100 text-black">
+                <NavBar/>
+                <Container className="flex-grow-1 mt-3">
+                    <div className="my-4 pb-2 border-bottom">
+                        <h1>Ticket Resolution</h1>
+                    </div>
+                    <br/>
+                    <Form onSubmit={onSubmit}>    
+                        <Row>  
+                            <Form.Group className="w-50" controlId="Comment">
+                                <Form.Label>Resolution</Form.Label>
+                                <Form.Control
+                                    required
+                                    className='border border-dark border-1'
+                                    as="textarea"
+                                    rows={4} 
+                                    value={log}
+                                    onChange={(e)=>setLog(e.target.value)}
+                                    placeholder="Comment Here..."/>
+                                <Form.Control.Feedback type="invalid">
+                                    Cannot be empty.
+                                </Form.Control.Feedback>            
+                            </Form.Group>       
+                        </Row>
+                        <br/>
+                        <Button className="mt-3 mx-4 btn-outline-primary" variant="secondary" type="button" onClick={onCancel}>
+                            Cancel
+                        </Button>
+                        <Button className="mt-3 mx-3" variant="primary" type="button" onClick={onSubmit}>
+                            Close Ticket
+                        </Button> 
+                    </Form>  
+                </Container>
+                <br/><br/><br/><br/><br/>
+                <Footer/>
+        </div>)}  
     </>)   
 
 }

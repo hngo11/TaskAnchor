@@ -34,7 +34,7 @@ app.post("/api/auth/register", async (req,res)=>{
 
     try{
 
-        const {username, email, password} = req.body
+        const {username, email, password, isadmin} = req.body
         let user = await Users.findOne({username})
 
         if(user) return res.status(401).json({"msg":"Username already exists"})
@@ -49,11 +49,11 @@ app.post("/api/auth/register", async (req,res)=>{
 })
 
 app.post("/api/createTicket", async (req,res)=>{
-    const {title, author, date, assigned, status, description, logs} = req.body
+    const {title, author, creationDate, resolutionDate, assigned, status, description, logs} = req.body
     
     try{
 
-        let ticket = new Tickets({title, author, date, assigned, status, description, logs})
+        let ticket = new Tickets({title, author, creationDate, resolutionDate, assigned, status, description, logs})
         console.log(ticket)
         ticket.save()
 
@@ -84,12 +84,13 @@ app.get("/api/allTickets", async (req,res)=>{
 
 })
 
-app.get("/api/userInfo", async (req,res)=>{
+app.get("/api/users/:userID", async (req,res)=>{
 
     try{
-        const user = await Users.findOne()
+        const userID = req.params.userID
+        const user = await Users.findOne({_id:userID})
         console.log(user)
-        return res.status(200).json(user)
+        return res.status(200).json({"userData":JSON.stringify(user)})
     }
     catch(err){console.log(err)}   
 })
