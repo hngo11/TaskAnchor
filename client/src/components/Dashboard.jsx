@@ -1,4 +1,4 @@
-import { Container, Form, Button, Table, Spinner } from 'react-bootstrap';
+import { Container, Form, Button, Table, Offcanvas, Spinner } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -18,7 +18,11 @@ function Dashboard() {
     const [firstLoading, setFirstLoading] = useState(true)
     const [secondLoading, setSecondLoading] = useState(true)
     const [filteredList, setFilteredList] = useState([]);
+    const [show, setShow] = useState(false);
 
+    const handleClose = () => setShow(false);
+    const toggleShow = () => setShow((s) => !s);
+    
     const onSubmit = async () => {
         navigate("/CreateTicket")
     }
@@ -93,6 +97,38 @@ function Dashboard() {
                     <div className="my-4 pb-2 border-bottom">
                         <h1>{user.username}'s Dashboard</h1>
                     </div>
+                    <Button variant="primary" onClick={toggleShow} className="me-2">
+                        Filter (In Dev.)
+                    </Button>
+                    <Offcanvas show={show} onHide={handleClose} scroll={true} backdrop={false}>
+                        <Offcanvas.Header closeButton>
+                        <Offcanvas.Title>Filter Table</Offcanvas.Title>
+                        </Offcanvas.Header>
+                        <Form>
+                            <Form.Group className=" w-50" controlId="name">
+                                <Form.Label> Currently Assigned:</Form.Label>
+                                <Form.Control
+                                    type="text" 
+                                    placeholder=""/>  
+                            </Form.Group>
+                            <Form.Group className=" w-50" controlId="name">
+                                    <Form.Label>Ticket Status</Form.Label>
+                                <Form.Select
+
+                                    aria-label="Default select example">
+                                    
+                                    <option></option> 
+                                    <option>New</option> 
+                                    <option>In Progress</option> 
+                                    <option>Resolved</option> 
+                                </Form.Select>
+                            </Form.Group>  
+                            <br/>            
+                            <Button variant="primary" onClick={handleClose}  className="me-2">
+                                Update Search
+                            </Button>
+                        </Form>
+                    </Offcanvas>
                     <Form onSubmit={onSubmit}> 
                         <Container className="d-flex mb-3 justify-content-end">
                             <Button className="d-flex mt-3 mx-3 " variant="primary" type="button" onClick={onSubmit}>
