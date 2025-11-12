@@ -34,12 +34,26 @@ app.post("/api/auth/register", async (req,res)=>{
 
     try{
 
-        const {username, email, password, isadmin} = req.body
+        const {username, email, password} = req.body
+
+        const numberUsers = await Users.countDocuments({})
+        console.log(numberUsers)
+        const EmployeeID =  "S" + (numberUsers+1).toString().padStart(6, '0') 
+
+        let isAdmin = false
+
+        if (numberUsers== 0) {            
+            isAdmin = true;
+
+        }
+
+
         let user = await Users.findOne({username})
+
 
         if(user) return res.status(401).json({"msg":"Username already exists"})
         const passwordHash = await bcrypt.hash(password, 10)
-        user = new Users({username,email,password:passwordHash})
+        user = new Users({EmployeeID,username,email,password:passwordHash,isAdmin})
         user.save()
 
         const token = await jwt.sign({id:user._id,user:username},process.env.JWT_SECRET,{expiresIn:"1h"})
@@ -49,10 +63,15 @@ app.post("/api/auth/register", async (req,res)=>{
 })
 
 app.post("/api/createTicket", async (req,res)=>{
-    const {title, author, creationDate, resolutionDate, assigned, status, description, logs} = req.body
+    const {title, author, assigned, description} = req.body
     
-    try{
+    const creationDate = new Date().toString()
+    const resolutionDate = ""
+    const status = "New"
+    const logs = []
 
+    try{
+        
         let ticket = new Tickets({title, author, creationDate, resolutionDate, assigned, status, description, logs})
         console.log(ticket)
         ticket.save()

@@ -18,6 +18,8 @@ function CreateTicket() {
     const [users, setUsers] = useState([])
     const [assigned, setAssigned] = useState("")
 
+    const token = localStorage.getItem("token")
+
 
     const onCancel = async () => {
         navigate(-1)
@@ -43,13 +45,7 @@ function CreateTicket() {
 
     const onSubmit = async () => {
     
-        let creationDate = new Date().toString()
-        let resolutionDate = ""
-        let status = "New"
-        let logs = []
         let author = "Unknown"
-
-        const token = localStorage.getItem("token")
         
         if(token != null){
             author = jwtDecode(token).user
@@ -64,7 +60,7 @@ function CreateTicket() {
             let response = await fetch(URL,{
                 method:"POST",
                 headers:{"content-type":"application/json"},
-                body:JSON.stringify({title, author, creationDate, resolutionDate, assigned, status, description,logs})
+                body:JSON.stringify({title, author, assigned, description})
             })
             const data = await response.json()
             if(response.ok){

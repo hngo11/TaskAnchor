@@ -16,7 +16,6 @@ function Register() {
     
     const onsubmit = async (event)=>{
 
-        let isadmin = false
 
         const form = event.currentTarget;
         console.log(form.checkValidity())
@@ -31,7 +30,7 @@ function Register() {
                 let response = await fetch(URL,{
                     method:"POST",
                     headers:{"content-type":"application/json"},
-                    body:JSON.stringify({username,email,password,isadmin})
+                    body:JSON.stringify({username,email,password})
                 })
                 const data = await response.json()
                 
