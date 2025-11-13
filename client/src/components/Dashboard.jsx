@@ -125,7 +125,7 @@ function Dashboard() {
 
     const handleSort = async (event) => {
         
-        const selection = event.target.value
+        let selection = event.target.value
         let list = filteredList
 
         setSort(selection)
@@ -250,7 +250,7 @@ function Dashboard() {
                 </Row>
                     <Offcanvas show={show} onHide={handleClose} scroll={true} backdrop="static">
                         <Offcanvas.Header closeButton>
-                            <Offcanvas.Title>Filter By;</Offcanvas.Title>
+                            <Offcanvas.Title>Filter By:</Offcanvas.Title>
                         </Offcanvas.Header>
                         <Offcanvas.Body>
                             <Form>

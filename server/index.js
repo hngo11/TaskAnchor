@@ -44,12 +44,10 @@ app.post("/api/auth/register", async (req,res)=>{
 
         if (numberUsers== 0) {            
             isAdmin = true;
-
         }
 
 
         let user = await Users.findOne({username})
-
 
         if(user) return res.status(401).json({"msg":"Username already exists"})
         const passwordHash = await bcrypt.hash(password, 10)
@@ -129,8 +127,16 @@ app.get("/api/view/:ticketID", async (req,res)=>{
 
 app.patch("/api/update/:ticketID", async (req, res) => {
     try {
+
+        const {log,status} = req.body
+
         const ticketID = req.params.ticketID;
-        const updateFields = req.body;
+        const ticket = await Tickets.findOne({_id:ticketID})
+        const logs = [...ticket.logs]
+        console.log(logs)
+       
+        const updateFields = {logs, status}
+        
         console.log(updateFields)
         const updatedItem = await Tickets.findByIdAndUpdate(
             ticketID,

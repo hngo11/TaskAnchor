@@ -1,6 +1,7 @@
 import { Container, Form, Row, Button, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import NavBar from './NavBar.jsx';
 import Footer from './Footer.jsx';
 
@@ -12,10 +13,11 @@ function Comment() {
     const navigate = useNavigate()
 
     const [loading, setLoading] = useState(true)
-    const [ticket, setTicket] = useState()
-    const [log, setLog] = useState("")
+    const [ticket, setTicket] = useState([]);
+    const [comment, setComment] = useState("")
     const {ticketID} = useParams()
-  
+
+    const token = localStorage.getItem("token")
     
     const onCancel = async () => {
         navigate(-1)
@@ -40,15 +42,24 @@ function Comment() {
 
     const onSubmit = async () => {
     
-        let status = "In Progress"
+        let author = "Unknown"    
 
-        const logs = [...ticket.logs,log]
+        if(token && token != "undefined"){
+             author = jwtDecode(token).user
+        }
+
+
+        const status = "In Progress"
+        const action= "Log"
+        const date = new Date().toString()
+        const log = {action,author,comment,date}
+        console.log(log)
 
         try {  
             const response = await fetch(updateURL+ticketID, {
                 method: 'PATCH',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({logs, status}),
+                body: JSON.stringify({log, status}),
             });
             const data = await response.json()
             if(response.ok){
@@ -88,8 +99,8 @@ function Comment() {
                                     className='border border-dark border-1'
                                     as="textarea"
                                     rows={8} 
-                                    value={log}
-                                    onChange={(e)=>setLog(e.target.value)}
+                                    value={comment}
+                                    onChange={(e)=>setComment(e.target.value)}
                                     placeholder="Comment Here..."/>
                                 <Form.Control.Feedback type="invalid">
                                     Cannot be empty.
