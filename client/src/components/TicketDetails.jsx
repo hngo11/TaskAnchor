@@ -81,7 +81,7 @@ function TicketDetails() {
                 </Spinner>
              </Container>):
             (          
-            <div className="d-flex flex-column min-vh-100">
+            <div className="page-background d-flex flex-column min-vh-100">
                 <NavBar/>
                 <Container className="flex-grow-1 mt-5" >
                     <div className="my-1 border-bottom">

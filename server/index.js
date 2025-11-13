@@ -38,7 +38,7 @@ app.post("/api/auth/register", async (req,res)=>{
 
         const numberUsers = await Users.countDocuments({})
         console.log(numberUsers)
-        const EmployeeID =  "S" + (numberUsers+1).toString().padStart(6, '0') 
+        const EmployeeID =  "S" + (numberUsers+1).toString().padStart(6,"0") 
 
         let isAdmin = false
 
@@ -70,9 +70,12 @@ app.post("/api/createTicket", async (req,res)=>{
     const status = "New"
     const logs = []
 
+    const numberTickets = await Tickets.countDocuments({})
+    const ticketNumber =  "TA-" + (numberTickets+1).toString().padStart(8,"0") 
+
     try{
         
-        let ticket = new Tickets({title, author, creationDate, resolutionDate, assigned, status, description, logs})
+        let ticket = new Tickets({ticketNumber, title, author, creationDate, resolutionDate, assigned, status, description, logs})
         console.log(ticket)
         ticket.save()
 

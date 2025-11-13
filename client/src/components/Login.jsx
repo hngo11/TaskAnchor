@@ -1,6 +1,7 @@
 import { Container, Form, Navbar, Nav, Col, Row, Card, Button } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import Logo from "../assets/anchor-svgrepo-com.svg"
 
 
 function Login() {
@@ -50,10 +51,19 @@ function Login() {
 
 
     return (
-		<div className="d-flex flex-column min-vh-100">
+		<div className="page-background d-flex flex-column min-vh-100">
 			<Navbar expand="lg" style={{ backgroundColor: '#80E6FF' }}>
 			<Container>
-				<Navbar.Brand className="fs-4 fw-bold" href="/">TaskAnchor</Navbar.Brand>
+				<Navbar.Brand className="fs-4 fw-bold" href="/">
+					<img 
+						src={Logo}
+						alt=""
+						width="30"
+						height="30"
+						className="d-inline-block align-top"
+					/>{' '}
+					TaskAnchor
+				</Navbar.Brand>
 				<Navbar.Toggle aria-controls="basic-navbar-nav" />
 			</Container>
 			</Navbar>

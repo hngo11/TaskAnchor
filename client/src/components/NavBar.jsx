@@ -11,7 +11,8 @@ function NavBar() {
     const token = localStorage.getItem("token");
 
     const navItems = [
-        { label: 'Dashboard', path: '/Dashboard' }
+        { label: 'Dashboard', path: '/Dashboard' },
+        { label: 'Create Ticket', path: '/CreateTicket' }
     ];
 
      const onHome = () => {

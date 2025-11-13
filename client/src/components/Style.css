@@ -1,9 +1,13 @@
+.page-background {
+  background-color: rgb(234, 241, 245);
+}
+
 /* sticky navbar currently does not work */
 .navbar {
     position: sticky;
     top: 0;
     overflow: hidden;
-    background-color: #80E6FF
+    background-color: #80E6FF;
 }
 
 .table {
@@ -16,7 +20,7 @@
     position: sticky;
     top: 0;
     z-index: 1;
-    background-color: #2fa6d4;
+    background-color: #b7e6f8;
 }
 
 .pointer {

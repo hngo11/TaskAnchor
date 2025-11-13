@@ -18,11 +18,12 @@ function Dashboard() {
     const [firstLoading, setFirstLoading] = useState(true)
     const [secondLoading, setSecondLoading] = useState(true)
     const [filteredList, setFilteredList] = useState([]);
-    const [sortedList, setSortedList] = useState([]);
     const [tableList, setTableList] = useState([]);
+    const [ticketNumFilter, setTicketNumFilter] = useState("");
     const [titleFilter, setTitleFilter] = useState("");
     const [assignedFilter, setAssignedFilter] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
+    const [filterButton, setFilterButton] = useState(false);
     const [show, setShow] = useState(false);
     const [sort, setSort] = useState("")
 
@@ -85,39 +86,47 @@ function Dashboard() {
         console.log(tickets)
         console.log(filteredList)
     },[secondLoading])
+    
 
-    const onFilter = async (titleFilt, assignedFilt, statusFilt) => {
+
+
+    useEffect(()=>{
+
+    const FilterList = async () => {
         
         let filter = tickets
 
-         if (titleFilt !== '') {
+        if (ticketNumFilter !== '') {
             filter = filter.filter(item =>
-                item.title.toLowerCase().includes(titleFilt.toLowerCase()));
+                item.ticketNumber.toLowerCase().includes(ticketNumFilter.toLowerCase()));
+        }        
+        if (titleFilter !== '') {
+            filter = filter.filter(item =>
+                item.title.toLowerCase().includes(titleFilter.toLowerCase()));
         }
-        if (assignedFilt !== '') {
+        if (assignedFilter !== '') {
             filter = filter.filter(item =>
-                item.assigned.toLowerCase().includes(assignedFilt.toLowerCase()));
+                item.assigned.toLowerCase().includes(assignedFilter.toLowerCase()));
         }
-         if (statusFilt !== '') {
+         if (statusFilter !== '') {
             filter = filter.filter(item =>
-                item.status.toLowerCase().includes(statusFilt.toLowerCase()));
+                item.status.toLowerCase().includes(statusFilter.toLowerCase()));
         }
 
         handleClose()
-        setTitleFilter(titleFilt)
-        setAssignedFilter(assignedFilt)
-        setStatusFilter(statusFilt)
         setSort("")
+        setFilterButton(false)
         setFilteredList(filter)
         setTableList(filter)
-
     }
+    FilterList()
+    },[ticketNumFilter, filterButton])
+
 
     const handleSort = async (event) => {
         
         const selection = event.target.value
         let list = filteredList
-        console.log(list)
 
         setSort(selection)
 
@@ -126,6 +135,13 @@ function Dashboard() {
 
         switch (selection) {
 
+            case 'ID':
+                selection = "ticketNumber"
+                sortedList = [...list].sort((a, b) => {
+                    const valA = a[selection];
+                    const valB = b[selection];
+                    return valA.localeCompare(valB)
+                })
             case 'Title':
             case 'Assigned':
             case 'Status':
@@ -156,6 +172,18 @@ function Dashboard() {
         }
     }
 
+    const handleFilter = async () => {
+        setFilterButton(true)
+    }
+
+    const handleClearFilter = async () => {
+        setTicketNumFilter("")
+        setTitleFilter("")
+        setAssignedFilter("")
+        setStatusFilter("")
+        setFilterButton(true)
+    }
+
 
     return (<>
         {(firstLoading || secondLoading)?(
@@ -174,33 +202,35 @@ function Dashboard() {
                     </div>
                 </Row>
                 <Row>
-                    <Container className="d-flex justify-content-end">
-                        <Button className="d-flex mx-3" variant="primary" type="button" onClick={onSubmit}>
-                            Open New Ticket
-                        </Button> 
-                    </Container>
-                </Row>
-                <Row>
-                    <Form.Group className=" w-25 mx-3" controlId="Search">
+                    <Col>
+                    <Form.Group className=" w-50 mx-3" controlId="Search">
                             <Form.Label> Search Ticket ID:</Form.Label>
                             <Form.Control
                                 type="text" 
                                 placeholder=""
-                                value={titleFilter}
-                                onChange={(e)=>{setTitleFilter(e.target.value);onFilter(titleFilter, assignedFilter, statusFilter)}}/>  
-                    </Form.Group>  
+                                value={ticketNumFilter}
+                                onChange={(e)=>setTicketNumFilter(e.target.value)}/>  
+                    </Form.Group>
+                    </Col>
+                    <Col className="d-flex align-items-center">
+                    <Container className="d-flex justify-content-end align-items-center">
+                        <Button variant="primary" type="button" onClick={onSubmit}>
+                            Open New Ticket
+                        </Button> 
+                    </Container>
+                    </Col>  
                 </Row>
                 <br/>                
                 <Row>
-                    <Col>
-                        <Container className="d-flex align-items-center">
+                    <Col className="d-flex align-items-center">
+                        <Container>
                             <Button variant="primary" onClick={toggleShow} className="me-2">
                                 Advanced Filters
                             </Button>
                         </Container>                           
                     </Col>
-                    <Col>
-                        <Container className="d-flex mb-3 justify-content-end">                   
+                    <Col className="d-flex align-items-end">
+                        <Container className="d-flex justify-content-end">                   
                             <Form.Group className=" w-25" controlId="SortList">
                                 <Form.Label>Sort By</Form.Label>
                                     <Form.Select
@@ -254,10 +284,10 @@ function Dashboard() {
                                     </Form.Select>
                                 </Form.Group>  
                                 <br/>            
-                                <Button variant="primary" onClick={() => onFilter(titleFilter, assignedFilter, statusFilter)}  className="me-2">
+                                <Button variant="primary" onClick={handleFilter}  className="me-2">
                                     Update Search
                                 </Button>
-                                 <Button variant="tertiary" onClick={() => onFilter("","","")}  className="me-2">
+                                 <Button variant="tertiary" onClick={handleClearFilter}  className="me-2">
                                     Clear All Filters
                                 </Button>
                             </Form>
@@ -270,8 +300,8 @@ function Dashboard() {
                     <Table responsive="sm" hover className="table-header pointer">
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Title</th>
-                                <th>Description</th>
                                 <th>Creation Date</th>
                                 <th>Assigned</th>
                                 <th>Status</th>
@@ -280,8 +310,8 @@ function Dashboard() {
                         <tbody>
                             {tableList.map((ticket) => (
                                 <tr key={ticket._id} onClick={()=>navigate(`/View/${ticket._id}`)}>
+                                    <td className="w-25">{ticket.ticketNumber}</td>
                                     <td className="w-25">{ticket.title}</td>
-                                    <td className="w-25">{ticket.description}</td>
                                     <td>{ticket.creationDate }</td>
                                     <td>{ticket.assigned}</td>
                                     <td>{ticket.status}</td>
