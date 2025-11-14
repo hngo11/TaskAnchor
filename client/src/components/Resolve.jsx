@@ -1,6 +1,7 @@
 import { Container, Form, Navbar, Row, Button, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import NavBar from './NavBar.jsx';
 import Footer from './Footer.jsx';
 
@@ -15,6 +16,8 @@ function ResolveTicket() {
     const [log, setLog] = useState("")
     const [loading, setLoading] = useState(true)
     const {ticketID} = useParams()
+
+    const token = localStorage.getItem("token")
   
 
     const onCancel = async () => {
@@ -40,10 +43,19 @@ function ResolveTicket() {
 
    const onSubmit = async () => {
 
-    let resolutionDate = new Date().toString()
-    let status = "Resolved"
+        let author = "Unknown"    
 
-    const logs = [...ticket.logs,log]
+        if(token && token != "undefined"){
+                author = jwtDecode(token).user
+        }
+
+        const status = "Resolved"
+        const action = "Resolution"
+        const comment = "Issue was resolved.\n\nTicket closed."
+        const resolutionDate = new Date().toString()
+        const date = resolutionDate
+        const log = {action,author,comment,date}
+        const logs = [...ticket.logs,log]
 
     try {  
         const response = await fetch(updateURL+ticketID, {
@@ -51,7 +63,7 @@ function ResolveTicket() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({status,resolutionDate,logs}),
+        body: JSON.stringify({resolutionDate,logs,status}),
       });
         const data = await response.json()
         if(response.ok){

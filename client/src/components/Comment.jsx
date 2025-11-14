@@ -50,16 +50,16 @@ function Comment() {
 
 
         const status = "In Progress"
-        const action= "Log"
+        const action = "Log"
         const date = new Date().toString()
         const log = {action,author,comment,date}
-        console.log(log)
+        const logs = [...ticket.logs,log]
 
         try {  
             const response = await fetch(updateURL+ticketID, {
                 method: 'PATCH',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({log, status}),
+                body: JSON.stringify({logs, status}),
             });
             const data = await response.json()
             if(response.ok){

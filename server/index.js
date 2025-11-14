@@ -120,7 +120,9 @@ app.get("/api/view/:ticketID", async (req,res)=>{
     try {
         const ticketID = req.params.ticketID
         const ticket = await Tickets.findOne({_id:ticketID})
+        console.log(ticket)
         return res.status(200).json({"ticketData":JSON.stringify(ticket)})
+        console.log(ticket)
     }   
     catch(err){console.log(err)}
 })
@@ -128,16 +130,11 @@ app.get("/api/view/:ticketID", async (req,res)=>{
 app.patch("/api/update/:ticketID", async (req, res) => {
     try {
 
-        const {log,status} = req.body
+        const updateFields = req.body
+        console.log(updateFields)
 
         const ticketID = req.params.ticketID;
-        const ticket = await Tickets.findOne({_id:ticketID})
-        const logs = [...ticket.logs]
-        console.log(logs)
-       
-        const updateFields = {logs, status}
         
-        console.log(updateFields)
         const updatedItem = await Tickets.findByIdAndUpdate(
             ticketID,
             {$set: updateFields},

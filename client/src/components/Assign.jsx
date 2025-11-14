@@ -1,6 +1,7 @@
 import { Container, Form, Row, Button, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
 import NavBar from './NavBar.jsx';
 import Footer from './Footer.jsx';
 
@@ -60,13 +61,26 @@ function Assign() {
 
     const onSubmit = async () => {
     
-        let status = "In Progress"
+
+        let author = "Unknown"    
+
+        if(token && token != "undefined"){
+             author = jwtDecode(token).user
+        }
+
+
+        const status = "In Progress"
+        const action = "Reassignment"
+        const comment = `Ticket reassigned to: [${assigned}]`
+        const date = new Date().toString()
+        const log = {action,author,comment,date}
+        const logs = [...ticket.logs,log]
 
         try {  
             const response = await fetch(updateURL+ticketID, {
                 method: 'PATCH',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({assigned, status}),
+                body: JSON.stringify({assigned, logs, status}),
             });
             const data = await response.json()
             if(response.ok){

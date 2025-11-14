@@ -1,4 +1,4 @@
-import { Container, ListGroup, Form, Col, Row, Button, Spinner, Card } from 'react-bootstrap';
+import { Container, Form, Col, Row, Button, Spinner, Card } from 'react-bootstrap';
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"
@@ -9,6 +9,7 @@ function TicketDetails() {
 
     const ticketURL = "http://localhost:3000/api/view/"
     const userURL = "http://localhost:3000/api/users/"
+    const updateURL = "http://localhost:3000/api/update/"
 
     const navigate = useNavigate()
 
@@ -71,8 +72,37 @@ function TicketDetails() {
         console.log(ticketID)
     },[secondLoading])
 
+    const handleReopen = async () => {
 
-    //The return page elements themselves. All bootstrap.
+        const author = user.username
+        const status = "In Progress"
+        const action = "Reopen Ticket"
+        const comment = "Ticket was Reopened"
+        const date = new Date().toString()
+        const resolutionDate = ""
+        const log = {action,author,comment,date}
+        const logs = [...ticket.logs,log]
+
+    try {  
+        const response = await fetch(updateURL+ticketID, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({resolutionDate,logs,status}),
+      });
+        const data = await response.json()
+        if(response.ok){
+        //   navigate('.')
+        }
+        else{
+          alert(data.msg || "Update unsuccessful")
+        }
+      }
+      catch(err){console.log(err)}
+  }
+
+
     return ( <>
         {(firstLoading || secondLoading)?(
             <Container className="d-flex justify-content-center align-items-center min-vh-100">
@@ -97,7 +127,8 @@ function TicketDetails() {
                                         <Form.Control
                                             type="text" 
                                             placeholder={ticket.title}
-                                            disabled />  
+                                            readOnly = {ticket.status != "Resolved"}
+                                            disabled = {ticket.status == "Resolved"} />  
                                     </Form.Group>
                                 </Col>
                                 <Col>
@@ -106,37 +137,40 @@ function TicketDetails() {
                                         <Form.Control
                                             type="text"
                                             placeholder={ticket.status}
-                                            disabled />  
+                                            readOnly = {ticket.status != "Resolved"}
+                                            disabled = {ticket.status == "Resolved"} />  
                                     </Form.Group>
                                 </Col>
                                 <Col>
-                                    <Form.Group controlId="creationdate">
+                                    <Form.Group controlId="creationdate" >
                                         <Form.Label>Date Created</Form.Label>
                                         <Form.Control
                                             type="text"
                                             placeholder={ticket.creationDate}
-                                            disabled />  
+                                            readOnly = {ticket.status != "Resolved"}
+                                            disabled = {ticket.status == "Resolved"} />  
                                     </Form.Group>
                                 </Col>
                             </Row>
                             <br/>
                             <Row>
-                                <Col md={3}>
+                                <Col md={3} className="my-2">
                                     <Form.Group controlId="Assigned">
-                                    <Form.Label>Assigned to:</Form.Label>
-                                    <Form.Control
-                                        type="text" 
-                                        placeholder={ticket.assigned}
-                                        disabled />  
+                                        <Form.Label>Assigned to:</Form.Label>
+                                        <Form.Control
+                                            type="text" 
+                                            placeholder={ticket.assigned}
+                                            readOnly = {ticket.status != "Resolved"}
+                                            disabled = {ticket.status == "Resolved"} />  
                                     </Form.Group>
                                 </Col>
-                                <Col className="mt-auto" md={5}>
+                                <Col className="mt-auto my-2" md={5}>
                                     {(user.isAdmin || (ticket.assigned===jwtDecode(token).user)) &&
-                                    <Container className="d-flex justify-content-start">
-                                        <Button variant="primary" type="button" disabled={ticket.status==="Resolved"} onClick={()=>navigate(`/Assign/${ticket._id}`)}>
-                                            Reassign
-                                        </Button>
-                                    </Container>
+                                        <Container className="d-flex justify-content-start">
+                                            <Button variant="primary" type="button" disabled={ticket.status==="Resolved"} onClick={()=>navigate(`/Assign/${ticket._id}`)}>
+                                                Reassign
+                                            </Button>
+                                        </Container>
                                     }
                                 </Col>
                                 <Col md={4}>
@@ -145,7 +179,8 @@ function TicketDetails() {
                                         <Form.Control
                                             type="text"
                                             placeholder={ticket.resolutionDate}
-                                            disabled />  
+                                            readOnly = {ticket.status != "Resolved"}
+                                            disabled = {ticket.status == "Resolved"} />  
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -157,7 +192,8 @@ function TicketDetails() {
                                     as="textarea"
                                     rows={8}
                                     placeholder={ticket.description}
-                                    disabled />  
+                                    readOnly = {ticket.status != "Resolved"}
+                                    disabled = {ticket.status == "Resolved"} />  
                                 </Form.Group>
                             </Row>
                             <br/><br/>
@@ -167,36 +203,33 @@ function TicketDetails() {
                             <br/>
                             <Row>
                                 <Container className="d-flex mb-3">
-                                    <Button className="d-flex mt-3 mx-3 " variant="primary" type="button" onClick={()=>navigate(`/Log/${ticket._id}`)}>
+                                    <Button className="d-flex mt-3" variant="primary" type="button" onClick={()=>navigate(`/Log/${ticket._id}`)}>
                                         Add to Log
                                     </Button> 
                                 </Container>  
                             </Row>                             
                             <Row>
-                                <Card> 
-                                    <Card.Header className="bg-transparent">
-                                        Action: Reassigment
-                                        <br/>
-                                        Performed by: [Test]
-                                    </Card.Header>
-                                    <Card.Body>
-                                        <Card.Text className="text-decoration-underline">
-                                            Details
-                                        </Card.Text>
-                                        <Card.Text>
-                                            Ticket reassigned to: [Steve]
-                                            <br/><br/>
-                                        </Card.Text>
-                                    </Card.Body>
-                                    <Card.Footer>Time: [Sat Nov 01 2025 02:55:06 GMT-0400 (Eastern Daylight Time)]</Card.Footer>
-                                </Card>
-                                <ListGroup className="py-0 w-75">
+                                <Container>
                                     {ticket.logs.map((item,index) => (
-                                    <ListGroup.Item key={index}>
-                                        {item}
-                                    </ListGroup.Item>
+                                        <Card key={index} className="mb-4"> 
+                                            <Card.Header className="bg-transparent">
+                                                Action: {item.action}
+                                                <br/>
+                                                Performed by: [{item.author}]
+                                            </Card.Header>
+                                            <Card.Body>
+                                                <Card.Text className="text-decoration-underline">
+                                                    Details
+                                                </Card.Text>
+                                                <Card.Text>
+                                                    {item.comment}
+                                                    <br/>
+                                                </Card.Text>
+                                            </Card.Body>
+                                            <Card.Footer>Time: [{item.date}]</Card.Footer>
+                                        </Card>
                                     ))}
-                                </ListGroup>
+                                </Container>
                             </Row>
                         </Col>
                         <Col md={3}>
@@ -210,6 +243,14 @@ function TicketDetails() {
                                 <Button  variant="primary" type="button" disabled={!(user.isAdmin || (ticket.assigned===jwtDecode(token).user))||ticket.status==="Resolved"} onClick={()=>navigate(`/Resolve/${ticket._id}`)}>
                                     Resolve Ticket
                                 </Button>
+                            </Row>
+                            <br/>
+                            <Row className="d-flex ms-auto w-75">
+                                {user.isAdmin &&
+                                    <Button  variant="primary" type="button" disabled={ticket.status!="Resolved"} onClick={handleReopen}>
+                                        Reopen Ticket
+                                    </Button>
+                                }
                             </Row>
                         </Col>
                     </Row>
