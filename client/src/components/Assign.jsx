@@ -14,29 +14,27 @@ function Assign() {
     const navigate = useNavigate()
 
     const [users, setUsers] = useState([])
+    const [user, setUser] = useState([])
     const [assigned, setAssigned] = useState("")
     const [loading, setLoading] = useState(true)
     const [ticket, setTicket] = useState()
     const {ticketID} = useParams()
     
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token")
 
 
     const onCancel = async () => {
         navigate(-1)
     }
 
-    useEffect(()=>{
+     useEffect(()=>{
 
-        const getUsers = async ()=>{
-            try{
-                const response = await fetch(userURL)
-                const users = await response.json()
-                setUsers(users) 
-            }
-        catch(err){console.log(err)}
+        if(token && token != "undefined"){
+             setUser(jwtDecode(token))
         }
-        getUsers()
+        else {
+            navigate('/')
+        }
 
         const getTicket = async ()=>{
             try{
@@ -45,13 +43,28 @@ function Assign() {
                 setTicket(JSON.parse(data.ticketData))
             }
             catch(err){console.log(err)}
-            finally{
-                setLoading(false)
-            }
         }
         getTicket()
-        
-    },[])
+
+     },[])     
+
+    useEffect(()=>{
+
+        const getUsers = async ()=>{
+            try{
+                const response = await fetch(userURL)
+                const users = await response.json()
+                const filteredUsers = users.filter(item => item.username !== ticket.assigned)
+                setUsers(filteredUsers) 
+            }
+        catch(err){console.log(err)}
+        finally{
+                setLoading(false)
+        }
+        }
+        getUsers()
+  
+    },[ticket])
 
     useEffect(()=>{
         console.log(loading)
@@ -62,13 +75,7 @@ function Assign() {
     const onSubmit = async () => {
     
 
-        let author = "Unknown"    
-
-        if(token && token != "undefined"){
-             author = jwtDecode(token).user
-        }
-
-
+        const author = user.user
         const status = "In Progress"
         const action = "Reassignment"
         const comment = `Ticket reassigned to: [${assigned}]`
@@ -110,7 +117,7 @@ function Assign() {
                     <Form onSubmit={onSubmit}>
                         <Row>
                             <div className="my-4 pb-2 border-bottom">
-                                <h1>Reassign Ticket</h1>
+                                <h2>Reassign Ticket</h2>
                             </div>
                         </Row>
                         <br/>

@@ -26,3 +26,8 @@
 .pointer {
     cursor: pointer;
 }
+
+.logs {
+    height: 450px;
+    overflow-y: auto
+}

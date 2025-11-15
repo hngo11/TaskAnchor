@@ -12,25 +12,33 @@ function ResolveTicket() {
 
     const navigate = useNavigate()
 
+    const [user, setUser] = useState([])   
     const [ticket, setTicket] = useState()
-    const [log, setLog] = useState("")
+    const [userComment, setUserComment] = useState("")
     const [loading, setLoading] = useState(true)
     const {ticketID} = useParams()
 
-    const token = localStorage.getItem("token")
+    const token = sessionStorage.getItem("token")
   
 
     const onCancel = async () => {
         navigate(-1)
     }
     
-   useEffect(()=>{
+    useEffect(()=>{
+
+        if(token && token != "undefined"){
+             setUser(jwtDecode(token))
+        }
+        else {
+            navigate('/')
+        }
 
         const getTicket = async ()=>{
             try{
                 const response = await fetch(ticketURL+ticketID)
                 const data = await response.json()
-                setTicket(JSON.parse(data.ticketData))   
+                setTicket(JSON.parse(data.ticketData))
             }
             catch(err){console.log(err)}
             finally{
@@ -38,22 +46,17 @@ function ResolveTicket() {
             }
         }
         getTicket()
-       
-    },[])
+
+    },[])   
 
    const onSubmit = async () => {
 
-        let author = "Unknown"    
-
-        if(token && token != "undefined"){
-                author = jwtDecode(token).user
-        }
-
+        const author = user.user   
         const status = "Resolved"
         const action = "Resolution"
-        const comment = "Issue was resolved.\n\nTicket closed."
-        const resolutionDate = new Date().toString()
-        const date = resolutionDate
+        const comment = `${userComment}\n\nTicket closed.`
+        const date = new Date().toString()
+        const resolutionDate = date
         const log = {action,author,comment,date}
         const logs = [...ticket.logs,log]
 
@@ -89,7 +92,7 @@ function ResolveTicket() {
                 <NavBar/>
                 <Container className="flex-grow-1 mt-3">
                     <div className="my-4 pb-2 border-bottom">
-                        <h1>Ticket Resolution</h1>
+                        <h2>Ticket Resolution</h2>
                     </div>
                     <br/>
                     <Form onSubmit={onSubmit}>    
@@ -101,8 +104,8 @@ function ResolveTicket() {
                                     className='border border-dark border-1'
                                     as="textarea"
                                     rows={4} 
-                                    value={log}
-                                    onChange={(e)=>setLog(e.target.value)}
+                                    value={userComment}
+                                    onChange={(e)=>setUserComment(e.target.value)}
                                     placeholder="Comment Here..."/>
                                 <Form.Control.Feedback type="invalid">
                                     Cannot be empty.

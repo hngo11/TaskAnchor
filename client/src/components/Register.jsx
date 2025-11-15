@@ -17,7 +17,6 @@ function Register() {
     
     const onsubmit = async (event)=>{
 
-
         const form = event.currentTarget;
         console.log(form.checkValidity())
         if (form.checkValidity() === false) {
@@ -37,7 +36,7 @@ function Register() {
                 
                 const token = data.token
                 if(response.ok && token){
-                    localStorage.setItem("token",token)
+                    sessionStorage.setItem("token",token)
                     navigate("/Dashboard")
                 }
                 else{

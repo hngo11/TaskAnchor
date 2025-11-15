@@ -8,7 +8,7 @@ function NavBar() {
 
     const navigate = useNavigate()
 
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token")
 
     const navItems = [
         { label: 'Dashboard', path: '/Dashboard' },
@@ -25,7 +25,7 @@ function NavBar() {
     };
 
     const logout = () => {
-        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
     };
 
     return (

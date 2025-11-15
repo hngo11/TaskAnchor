@@ -36,7 +36,7 @@ function Login() {
 				
 				const token = data.token
 				if(response.ok && token) {
-					localStorage.setItem("token",token)
+					sessionStorage.setItem("token",token)
 					navigate("/Dashboard")
 				}
 				else{

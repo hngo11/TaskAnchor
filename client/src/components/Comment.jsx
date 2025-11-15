@@ -12,24 +12,32 @@ function Comment() {
     
     const navigate = useNavigate()
 
-    const [loading, setLoading] = useState(true)
+    const [user, setUser] = useState([])
     const [ticket, setTicket] = useState([]);
     const [comment, setComment] = useState("")
+    const [loading, setLoading] = useState(true)
     const {ticketID} = useParams()
 
-    const token = localStorage.getItem("token")
+    const token = sessionStorage.getItem("token")
     
     const onCancel = async () => {
         navigate(-1)
     }
     
-   useEffect(()=>{
+     useEffect(()=>{
+
+        if(token && token != "undefined"){
+             setUser(jwtDecode(token))
+        }
+        else {
+            navigate('/')
+        }
 
         const getTicket = async ()=>{
             try{
                 const response = await fetch(ticketURL+ticketID)
                 const data = await response.json()
-                setTicket(JSON.parse(data.ticketData))   
+                setTicket(JSON.parse(data.ticketData))
             }
             catch(err){console.log(err)}
             finally{
@@ -37,18 +45,12 @@ function Comment() {
             }
         }
         getTicket()
-       
-    },[])
+
+     },[])     
 
     const onSubmit = async () => {
     
-        let author = "Unknown"    
-
-        if(token && token != "undefined"){
-             author = jwtDecode(token).user
-        }
-
-
+        const author = user.user   
         const status = "In Progress"
         const action = "Log"
         const date = new Date().toString()
@@ -87,7 +89,7 @@ function Comment() {
                     <Form onSubmit={onSubmit}>
                         <Row>
                             <div className="my-4 pb-2 border-bottom">
-                                <h1>Update Log</h1>
+                                <h2>Update Log</h2>
                             </div>
                         </Row>
                         <br/>

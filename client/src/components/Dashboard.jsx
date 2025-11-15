@@ -15,8 +15,7 @@ function Dashboard() {
 
     const [user, setUser] = useState({});
     const [tickets, setTickets] = useState([]);
-    const [firstLoading, setFirstLoading] = useState(true)
-    const [secondLoading, setSecondLoading] = useState(true)
+    const [loading, setLoading] = useState(true)
     const [filteredList, setFilteredList] = useState([]);
     const [tableList, setTableList] = useState([]);
     const [ticketNumFilter, setTicketNumFilter] = useState("");
@@ -34,14 +33,18 @@ function Dashboard() {
         navigate("/CreateTicket")
     }
 
-    const token = localStorage.getItem("token")
+    const token = sessionStorage.getItem("token")
+
     
     useEffect(()=>{
 
-        let userID = ""
+        let userID
         
         if(token && token != "undefined"){
             userID = jwtDecode(token).id
+        }
+        else {
+            navigate('/')
         }
 
         const getUser = async ()=>{
@@ -51,9 +54,6 @@ function Dashboard() {
                 setUser(JSON.parse(data.userData))
             }
             catch(err){console.log(err)}
-             finally{
-                setFirstLoading(false)
-            }
         }
         getUser()
       
@@ -71,106 +71,116 @@ function Dashboard() {
             }
             catch(err){console.log(err)}
             finally{
-                setSecondLoading(false)
+                setLoading(false)
             }
         }
         getTickets()
 
         
-    },[firstLoading])    
+    },[user])    
 
     useEffect(()=>{
-        console.log(firstLoading)
+        console.log(loading)
         console.log(user)
-        console.log(secondLoading)
         console.log(tickets)
         console.log(filteredList)
-    },[secondLoading])
+    },[loading])
     
-
-
-
     useEffect(()=>{
 
-    const FilterList = async () => {
-        
-        let filter = tickets
+        const FilterList = async () => {
+            
+            let filter = tickets
 
-        if (ticketNumFilter !== '') {
-            filter = filter.filter(item =>
-                item.ticketNumber.toLowerCase().includes(ticketNumFilter.toLowerCase()));
-        }        
-        if (titleFilter !== '') {
-            filter = filter.filter(item =>
-                item.title.toLowerCase().includes(titleFilter.toLowerCase()));
-        }
-        if (assignedFilter !== '') {
-            filter = filter.filter(item =>
-                item.assigned.toLowerCase().includes(assignedFilter.toLowerCase()));
-        }
-         if (statusFilter !== '') {
-            filter = filter.filter(item =>
-                item.status.toLowerCase().includes(statusFilter.toLowerCase()));
-        }
+            if (ticketNumFilter !== '') {
+                filter = filter.filter(item =>
+                    item.ticketNumber.toLowerCase().includes(ticketNumFilter.toLowerCase()));
+            }        
+            if (titleFilter !== '') {
+                filter = filter.filter(item =>
+                    item.title.toLowerCase().includes(titleFilter.toLowerCase()));
+            }
+            if (assignedFilter !== '') {
+                filter = filter.filter(item =>
+                    item.assigned.toLowerCase().includes(assignedFilter.toLowerCase()));
+            }
+            if (statusFilter !== '') {
+                filter = filter.filter(item =>
+                    item.status.toLowerCase().includes(statusFilter.toLowerCase()));
+            }
 
-        handleClose()
-        setSort("")
-        setFilterButton(false)
-        setFilteredList(filter)
-        setTableList(filter)
-    }
-    FilterList()
+            handleClose()
+            setSort("")
+            setFilterButton(false)
+            setFilteredList(filter)
+            setTableList(filter)
+        }
+        FilterList()
+
     },[ticketNumFilter, filterButton])
 
-
-    const handleSort = async (event) => {
+    useEffect(()=>{
         
-        let selection = event.target.value
-        let list = filteredList
+        const SortList = async () => {
+        
+            let list = filteredList
+            console.log(sort)
 
-        setSort(selection)
+            let sortedList = [];
+            let dateObject = "";
+            let selection = "";
 
-        let sortedList =[];
-        let dateObject =""
+            switch (sort) {
 
-        switch (selection) {
-
-            case 'ID':
-                selection = "ticketNumber"
+                case 'ID (Ascending)':
+                    selection = "ticketNumber"
+                    sortedList = [...list].sort((a, b) => {
+                        const valA = a[selection];
+                        const valB = b[selection];
+                        return valA.localeCompare(valB)
+                    })
+                    return setTableList(sortedList);
+                case 'ID (Descending)':
+                    selection = "ticketNumber"
+                    sortedList = [...list].sort((a, b) => {
+                        const valA = a[selection];
+                        const valB = b[selection];
+                        return valB.localeCompare(valA)
+                    })
+                    return setTableList(sortedList);
+                case 'Title':
+                case 'Assigned':
+                case 'Status':
                 sortedList = [...list].sort((a, b) => {
-                    const valA = a[selection];
-                    const valB = b[selection];
-                    return valA.localeCompare(valB)
-                })
-            case 'Title':
-            case 'Assigned':
-            case 'Status':
-              sortedList = [...list].sort((a, b) => {
-                    const valA = a[selection.toLowerCase()];
-                    const valB = b[selection.toLowerCase()];
-                    return valA.localeCompare(valB)
-                })
-                return setTableList(sortedList);  
-            case 'Date(Newest)':
-                dateObject = "creation"+selection.substring(0,4);
-                sortedList = [...list].sort((a, b) => {
-                    const valA = new Date(a[dateObject]);
-                    const valB = new Date(b[dateObject]);
-                return valB.getTime() - valA.getTime();
-                })
-                return setTableList(sortedList);  
-            case 'Date(Oldest)':
-                dateObject = "creation"+selection.substring(0,4);
-                sortedList = [...list].sort((a, b) => {
-                    const valA = new Date(a[dateObject]);
-                    const valB = new Date(b[dateObject]);
-                return valA.getTime() - valB.getTime();
-                })
-                return setTableList(sortedList);
-            default:
-                return setTableList(list);
+                        const valA = a[selection.toLowerCase()];
+                        const valB = b[selection.toLowerCase()];
+                        return valA.localeCompare(valB)
+                    })
+                    return setTableList(sortedList);  
+                case 'Date(Newest)':
+                    dateObject = "creation"+selection.substring(0,4);
+                    sortedList = [...list].sort((a, b) => {
+                        const valA = new Date(a[dateObject]);
+                        const valB = new Date(b[dateObject]);
+                    return valB.getTime() - valA.getTime();
+                    })
+                    return setTableList(sortedList);  
+                case 'Date(Oldest)':
+                    dateObject = "creation"+selection.substring(0,4);
+                    sortedList = [...list].sort((a, b) => {
+                        const valA = new Date(a[dateObject]);
+                        const valB = new Date(b[dateObject]);
+                    return valA.getTime() - valB.getTime();
+                    })
+                    return setTableList(sortedList);
+                default:
+                    return setTableList(list);
+            }
+           
         }
-    }
+        SortList()
+
+    },[sort])
 
     const handleFilter = async () => {
         setFilterButton(true)
@@ -186,7 +196,7 @@ function Dashboard() {
 
 
     return (<>
-        {(firstLoading || secondLoading)?(
+        {(loading)?(
             <Container className="d-flex justify-content-center align-items-center min-vh-100">
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>
@@ -198,7 +208,7 @@ function Dashboard() {
                 <Container className="flex-grow-1 mt-3">  
                 <Row>
                     <div className="my-4 pb-2 border-bottom">
-                        <h1>{user.username}'s Dashboard (ID:{user.EmployeeID})</h1>
+                        <h2>{user.username}'s Dashboard (ID:{user.EmployeeID})</h2>
                     </div>
                 </Row>
                 <Row>
@@ -235,12 +245,13 @@ function Dashboard() {
                                 <Form.Label>Sort By</Form.Label>
                                     <Form.Select
                                         value={sort}
-                                        onChange={handleSort}
+                                        onChange={(e)=>setSort(e.target.value)}
                                         aria-label="Default select example">
                                         <option></option> 
-                                        <option>Title</option> 
-                                        <option>Date(Newest)</option> 
-                                        <option>Date(Oldest)</option>
+                                        <option>ID (Ascending)</option>
+                                        <option>ID (Descending)</option>
+                                        <option>Date (Newest)</option> 
+                                        <option>Date (Oldest)</option>
                                         <option>Assigned</option>
                                         <option>Status</option>
                                     </Form.Select>
@@ -293,8 +304,9 @@ function Dashboard() {
                             </Form>
                         </Offcanvas.Body>
                     </Offcanvas>
+                    <br/>
                     <div className="border-bottom">
-                        <h2>All Tickets</h2>
+                        <h3>All Tickets</h3>
                     </div>
                     <div className="table border border-3">
                     <Table responsive="sm" hover className="table-header pointer">

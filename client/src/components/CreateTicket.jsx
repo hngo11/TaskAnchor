@@ -12,13 +12,14 @@ function CreateTicket() {
 
     const navigate = useNavigate()
 
+    const [user, setUser] = useState([])
+    const [users, setUsers] = useState([])
     const [title, setTitle] = useState("")
+    const [assigned, setAssigned] = useState("")
     const [description, setDescription] = useState("")
     const [loading, setLoading] = useState(true)
-    const [users, setUsers] = useState([])
-    const [assigned, setAssigned] = useState("")
 
-    const token = localStorage.getItem("token")
+    const token = sessionStorage.getItem("token")
 
 
     const onCancel = async () => {
@@ -26,6 +27,13 @@ function CreateTicket() {
     }
 
     useEffect(()=>{
+
+        if(token && token != "undefined"){
+             setUser(jwtDecode(token))
+        }
+        else {
+            navigate('/')
+        }
 
         const getUsers = async ()=>{
             try{
@@ -40,18 +48,12 @@ function CreateTicket() {
         }
         getUsers()
 
-    },[])
-
+    },[]) 
 
     const onSubmit = async () => {
     
-        let author = "Unknown"
+        let author = user.user
         
-        if(token != null){
-            author = jwtDecode(token).user
-            console.log(author)
-        }
-
         if (assigned == null) {
             setAssigned(author)
         }
@@ -89,7 +91,7 @@ function CreateTicket() {
                     <Form onSubmit={onSubmit}>
                         <Row>
                             <div className="my-4 pb-2 border-bottom">
-                                <h1>New Ticket Creation</h1>
+                                <h2>New Ticket Creation</h2>
                             </div>
                         </Row>
                         <br/>

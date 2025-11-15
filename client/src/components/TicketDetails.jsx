@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode"
 import NavBar from './NavBar.jsx';
 import Footer from './Footer.jsx';
+import LogCard from './LogCard.jsx';
+
 
 function TicketDetails() {
 
@@ -15,11 +17,11 @@ function TicketDetails() {
 
     const [user, setUser] = useState({});
     const [ticket, setTicket] = useState()
-    const [firstLoading, setFirstLoading] = useState(true)
-    const [secondLoading, setSecondLoading] = useState(true)
+    const [loading, setLoading] = useState(true)
     const {ticketID} = useParams()
 
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token")
+
     
     useEffect(()=>{
 
@@ -36,9 +38,6 @@ function TicketDetails() {
                 setUser(JSON.parse(data.userData))
             }
             catch(err){console.log(err)}
-             finally{
-                setFirstLoading(false)
-            }
         }
         getUser()
       
@@ -56,21 +55,20 @@ function TicketDetails() {
             }
             catch(err){console.log(err)}
             finally{
-                setSecondLoading(false)
+                setLoading(false)
             }
         }
         getTicket()
 
-    },[firstLoading])
+    },[user])
   
 
     useEffect(()=>{
-        console.log(firstLoading)
+        console.log(loading)
         console.log(user)
-        console.log(secondLoading)
         console.log(ticket)
         console.log(ticketID)
-    },[secondLoading])
+    },[loading])
 
     const handleReopen = async () => {
 
@@ -83,28 +81,26 @@ function TicketDetails() {
         const log = {action,author,comment,date}
         const logs = [...ticket.logs,log]
 
-    try {  
-        const response = await fetch(updateURL+ticketID, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({resolutionDate,logs,status}),
-      });
-        const data = await response.json()
-        if(response.ok){
-        //   navigate('.')
+        try {  
+            const response = await fetch(updateURL+ticketID, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({resolutionDate,logs,status}),
+            });
+            const data = await response.json()
+            if(response.ok){
+                window.location.reload();
+            }
+            else{
+            alert(data.msg || "Update unsuccessful")
+            }
         }
-        else{
-          alert(data.msg || "Update unsuccessful")
-        }
-      }
-      catch(err){console.log(err)}
+        catch(err){console.log(err)}
   }
 
 
     return ( <>
-        {(firstLoading || secondLoading)?(
+        {(loading)?(
             <Container className="d-flex justify-content-center align-items-center min-vh-100">
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>
@@ -117,7 +113,7 @@ function TicketDetails() {
                     <div className="my-1 border-bottom">
                         <h2>Ticket Details</h2>
                     </div>
-                    <br/><br/>                          
+                    <br/>                          
                     <Row>
                         <Col md={9}>
                             <Row>
@@ -165,7 +161,7 @@ function TicketDetails() {
                                     </Form.Group>
                                 </Col>
                                 <Col className="mt-auto my-2" md={5}>
-                                    {(user.isAdmin || (ticket.assigned===jwtDecode(token).user)) &&
+                                    {(user.isAdmin || (ticket.assigned===user.username)) &&
                                         <Container className="d-flex justify-content-start">
                                             <Button variant="primary" type="button" disabled={ticket.status==="Resolved"} onClick={()=>navigate(`/Assign/${ticket._id}`)}>
                                                 Reassign
@@ -184,7 +180,7 @@ function TicketDetails() {
                                     </Form.Group>
                                 </Col>
                             </Row>
-                            <br/><br/>
+                            <br/>
                             <Row>
                                 <Form.Group controlId="Description">
                                 <Form.Label>Description</Form.Label>
@@ -203,31 +199,18 @@ function TicketDetails() {
                             <br/>
                             <Row>
                                 <Container className="d-flex mb-3">
-                                    <Button className="d-flex mt-3" variant="primary" type="button" onClick={()=>navigate(`/Log/${ticket._id}`)}>
+                                    <Button className="d-flex" variant="primary" type="button" onClick={()=>navigate(`/Log/${ticket._id}`)}>
                                         Add to Log
                                     </Button> 
                                 </Container>  
                             </Row>                             
                             <Row>
-                                <Container>
+                                <Container className="logs">
                                     {ticket.logs.map((item,index) => (
-                                        <Card key={index} className="mb-4"> 
-                                            <Card.Header className="bg-transparent">
-                                                Action: {item.action}
-                                                <br/>
-                                                Performed by: [{item.author}]
-                                            </Card.Header>
-                                            <Card.Body>
-                                                <Card.Text className="text-decoration-underline">
-                                                    Details
-                                                </Card.Text>
-                                                <Card.Text>
-                                                    {item.comment}
-                                                    <br/>
-                                                </Card.Text>
-                                            </Card.Body>
-                                            <Card.Footer>Time: [{item.date}]</Card.Footer>
-                                        </Card>
+                                        <LogCard
+                                            log={item}
+                                            key={index}
+                                        />
                                     ))}
                                 </Container>
                             </Row>
@@ -240,7 +223,7 @@ function TicketDetails() {
                             </Row>
                             <br/>
                             <Row className="d-flex ms-auto w-75">
-                                <Button  variant="primary" type="button" disabled={!(user.isAdmin || (ticket.assigned===jwtDecode(token).user))||ticket.status==="Resolved"} onClick={()=>navigate(`/Resolve/${ticket._id}`)}>
+                                <Button  variant="primary" type="button" disabled={!(user.isAdmin || (ticket.assigned===user.username))||ticket.status==="Resolved"} onClick={()=>navigate(`/Resolve/${ticket._id}`)}>
                                     Resolve Ticket
                                 </Button>
                             </Row>
