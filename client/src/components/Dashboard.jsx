@@ -152,21 +152,22 @@ function Dashboard() {
                 case 'Assigned':
                 case 'Status':
                 sortedList = [...list].sort((a, b) => {
-                        const valA = a[selection.toLowerCase()];
-                        const valB = b[selection.toLowerCase()];
+                        const valA = a[sort.toLowerCase()];
+                        const valB = b[sort.toLowerCase()];
                         return valA.localeCompare(valB)
                     })
                     return setTableList(sortedList);  
-                case 'Date(Newest)':
-                    dateObject = "creation"+selection.substring(0,4);
+                case 'Date (Newest)':
+                    dateObject = "creation"+sort.substring(0,4);
+                    console.log(dateObject)
                     sortedList = [...list].sort((a, b) => {
                         const valA = new Date(a[dateObject]);
                         const valB = new Date(b[dateObject]);
                     return valB.getTime() - valA.getTime();
                     })
                     return setTableList(sortedList);  
-                case 'Date(Oldest)':
-                    dateObject = "creation"+selection.substring(0,4);
+                case 'Date (Oldest)':
+                    dateObject = "creation"+sort.substring(0,4);
                     sortedList = [...list].sort((a, b) => {
                         const valA = new Date(a[dateObject]);
                         const valB = new Date(b[dateObject]);
