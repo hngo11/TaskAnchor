@@ -37,7 +37,6 @@ app.post("/api/auth/register", async (req,res)=>{
         const {username, email, password} = req.body
 
         const numberUsers = await Users.countDocuments({})
-        console.log(numberUsers)
         const EmployeeID =  "S" + (numberUsers+1).toString().padStart(6,"0") 
 
         let isAdmin = false
@@ -48,8 +47,10 @@ app.post("/api/auth/register", async (req,res)=>{
 
 
         let user = await Users.findOne({username})
+        let userEmail = await Users.findOne({email})
 
         if(user) return res.status(401).json({"msg":"Username already exists"})
+        if(userEmail) return res.status(401).json({"msg":"Account exists with this email"})    
         const passwordHash = await bcrypt.hash(password, 10)
         user = new Users({EmployeeID,username,email,password:passwordHash,isAdmin})
         user.save()

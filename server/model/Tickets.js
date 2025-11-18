@@ -4,7 +4,8 @@ const ticketSchema = mongoose.Schema({
 
     ticketNumber: { 
         type:String,
-        required:true
+        required:true,
+        unique:true
     },
     title: { 
         type:String,
