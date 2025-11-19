@@ -67,7 +67,11 @@ app.post("/api/createTicket", async (req,res)=>{
     const creationDate = new Date().toString()
     const resolutionDate = ""
     const status = "New"
-    const logs = []
+ 
+    const comment = `New ticket created by ${author}` 
+    const log = {action: "Ticket Creation",author,comment,date: creationDate}
+    const logs = [log]
+
 
     const numberTickets = await Tickets.countDocuments({})
     const ticketNumber =  "TA-" + (numberTickets+1).toString().padStart(8,"0") 
@@ -123,7 +127,6 @@ app.get("/api/view/:ticketID", async (req,res)=>{
         const ticket = await Tickets.findOne({_id:ticketID})
         console.log(ticket)
         return res.status(200).json({"ticketData":JSON.stringify(ticket)})
-        console.log(ticket)
     }   
     catch(err){console.log(err)}
 })
