@@ -51,11 +51,16 @@ function Comment() {
     const onSubmit = async () => {
     
         const author = user.user   
-        const status = "In Progress"
         const action = "Log"
         const date = new Date().toString()
         const log = {action,author,comment,date}
         const logs = [...ticket.logs,log]
+
+        let status = ticket.status
+        if (status !== "Resolved")
+            status =  "In Progress"
+
+
 
         try {  
             const response = await fetch(updateURL+ticketID, {

@@ -62,7 +62,6 @@ function TicketDetails() {
 
     },[user])
   
-
     useEffect(()=>{
         console.log(loading)
         console.log(user)
@@ -163,7 +162,7 @@ function TicketDetails() {
                                 <Col className="mt-auto my-2" md={5}>
                                     {(user.isAdmin || (ticket.assigned===user.username)) &&
                                         <Container className="d-flex justify-content-start">
-                                            <Button variant="primary" type="button" disabled={ticket.status==="Resolved"} onClick={()=>navigate(`/Assign/${ticket._id}`)}>
+                                            <Button variant="primary" type="button" disabled={ticket.status==="Resolved"} onClick={()=>navigate(`/ticketdetails/assign/${ticket._id}`)}>
                                                 Reassign
                                             </Button>
                                         </Container>
@@ -199,7 +198,7 @@ function TicketDetails() {
                             <br/>
                             <Row>
                                 <Container className="d-flex mb-3">
-                                    <Button className="d-flex" variant="primary" type="button" onClick={()=>navigate(`/Log/${ticket._id}`)}>
+                                    <Button className="d-flex" variant="primary" type="button" onClick={()=>navigate(`/ticketdetails/log/${ticket._id}`)}>
                                         Add to Log
                                     </Button> 
                                 </Container>  
@@ -223,7 +222,7 @@ function TicketDetails() {
                             </Row>
                             <br/>
                             <Row className="d-flex ms-auto w-75">
-                                <Button  variant="primary" type="button" disabled={!(user.isAdmin || (ticket.assigned===user.username))||ticket.status==="Resolved"} onClick={()=>navigate(`/Resolve/${ticket._id}`)}>
+                                <Button  variant="primary" type="button" disabled={!(user.isAdmin || (ticket.assigned===user.username))||ticket.status==="Resolved"} onClick={()=>navigate(`/ticketdetails/resolve/${ticket._id}`)}>
                                     Resolve Ticket
                                 </Button>
                             </Row>

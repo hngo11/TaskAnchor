@@ -322,7 +322,7 @@ function Dashboard() {
                         </thead>
                         <tbody>
                             {tableList.map((ticket) => (
-                                <tr key={ticket._id} onClick={()=>navigate(`/View/${ticket._id}`)}>
+                                <tr key={ticket._id} onClick={()=>navigate(`/ticketdetails/${ticket._id}`)}>
                                     <td className="w-25">{ticket.ticketNumber}</td>
                                     <td className="w-25">{ticket.title}</td>
                                     <td>{ticket.creationDate }</td>

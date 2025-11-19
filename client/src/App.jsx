@@ -25,10 +25,10 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/createticket" element={<CreateTicket />} />
-        <Route path="/View/:ticketID" element={<TicketDetails />} />
-        <Route path="/Log/:ticketID" element={<Comment />} />
-        <Route path="/Assign/:ticketID" element={<Assign />} />
-        <Route path="/Resolve/:ticketID" element={<Resolve />} />
+        <Route path="/ticketdetails/:ticketID" element={<TicketDetails />} />
+        <Route path="/ticketdetails/log/:ticketID" element={<Comment />} />
+        <Route path="/ticketdetails/assign/:ticketID" element={<Assign />} />
+        <Route path="/ticketdetails/resolve/:ticketID" element={<Resolve />} />
       </Routes>
     </BrowserRouter>
   )

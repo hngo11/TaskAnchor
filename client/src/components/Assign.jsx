@@ -16,7 +16,8 @@ function Assign() {
     const [users, setUsers] = useState([])
     const [user, setUser] = useState([])
     const [assigned, setAssigned] = useState("")
-    const [loading, setLoading] = useState(true)
+    const [firstLoading, setFirstLoading] = useState(true)
+    const [secondLoading, setSecondLoading] = useState(true)
     const [ticket, setTicket] = useState()
     const {ticketID} = useParams()
     
@@ -43,6 +44,9 @@ function Assign() {
                 setTicket(JSON.parse(data.ticketData))
             }
             catch(err){console.log(err)}
+            finally{
+                setFirstLoading(false)
+            }
         }
         getTicket()
 
@@ -59,7 +63,7 @@ function Assign() {
             }
         catch(err){console.log(err)}
         finally{
-                setLoading(false)
+                setSecondLoading(false)
         }
         }
         getUsers()
@@ -67,10 +71,9 @@ function Assign() {
     },[ticket])
 
     useEffect(()=>{
-        console.log(loading)
         console.log(ticket)
         console.log(ticketID)
-    },[loading])
+    },[secondLoading])
 
     const onSubmit = async () => {
     
@@ -103,7 +106,7 @@ function Assign() {
 
 
     return (<>
-        {loading?(
+        {firstLoading || secondLoading?(
             <Container className="d-flex justify-content-center align-items-center min-vh-100">
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>
