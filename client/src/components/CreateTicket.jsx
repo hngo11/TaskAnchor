@@ -7,8 +7,8 @@ import Footer from './Footer.jsx';
 
 function CreateTicket() {
 
-    const createURL = "http://localhost:3000/api/createTicket"
-    const userURL = "http://localhost:3000/api/allusers"
+    const createURL = "http://localhost:3000/api/newTicket"
+    const userURL = "http://localhost:3000/api/allUsers"
 
     const navigate = useNavigate()
 
@@ -29,12 +29,20 @@ function CreateTicket() {
 
     useEffect(()=>{
 
-        if(token && token != "undefined"){
-             setUser(jwtDecode(token))
+        const checkToken = async ()=>{
+
+            const decodedToken = jwtDecode(token)
+            const currentTime = Date.now() / 1000;
+
+            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+                sessionStorage.removeItem("token")
+                navigate('/') 
+            }
+            else {
+                setUser(decodedToken)
+            }
         }
-        else {
-            navigate('/')
-        }
+        checkToken()   
 
         const getUsers = async ()=>{
             try{
@@ -78,7 +86,6 @@ function CreateTicket() {
                     body:JSON.stringify({title, author, assigned, description})
                 })
                 const data = await response.json()
-                console.log(response.ok)
                 if(response.ok){
                     navigate("/Dashboard")
                 }

@@ -1,7 +1,7 @@
-import { Container, Form, Col, Row, Button, Spinner, Card } from 'react-bootstrap';
+import { Container, Form, Col, Row, Button, Spinner, Modal } from 'react-bootstrap';
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"
+import { jwtDecode } from "jwt-decode";
 import NavBar from './NavBar.jsx';
 import Footer from './Footer.jsx';
 import LogCard from './LogCard.jsx';
@@ -9,15 +9,18 @@ import LogCard from './LogCard.jsx';
 
 function TicketDetails() {
 
-    const ticketURL = "http://localhost:3000/api/view/"
+    const ticketURL = "http://localhost:3000/api/tickets/"
     const userURL = "http://localhost:3000/api/user"
     const updateURL = "http://localhost:3000/api/update/"
 
     const navigate = useNavigate()
+    const closePopup = () => setShow(false);
+    const showPopup = () => setShow(true);
 
     const [user, setUser] = useState({});
     const [ticket, setTicket] = useState()
     const [loading, setLoading] = useState(true)
+    const [show, setShow] = useState(false);
     const {ticketID} = useParams()
 
     const token = sessionStorage.getItem("token")
@@ -25,9 +28,17 @@ function TicketDetails() {
     
     useEffect(()=>{
 
-        if(!token || token == "undefined"){
-            navigate('/')
+        const checkToken = async ()=>{
+
+            const decodedToken = jwtDecode(token)
+            const currentTime = Date.now() / 1000;
+
+            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+                sessionStorage.removeItem("token")
+                navigate('/') 
+            }
         }
+        checkToken()   
 
        const getUser = async ()=>{
             try{
@@ -47,8 +58,6 @@ function TicketDetails() {
 
     useEffect(()=>{
 
-        console.log(ticketURL+ticketID)
-
         const getTicket = async ()=>{
             try{
                 const response = await fetch(ticketURL+ticketID,{
@@ -67,12 +76,6 @@ function TicketDetails() {
         getTicket()
 
     },[user])
-  
-    useEffect(()=>{
-        console.log(loading)
-        console.log(user)
-        console.log(ticket)
-    },[loading])
 
     const handleReopen = async () => {
 
@@ -235,7 +238,7 @@ function TicketDetails() {
                             <br/>
                             <Row className="d-flex ms-auto w-75">
                                 {user.isAdmin &&
-                                    <Button  variant="primary" type="button" disabled={ticket.status!="Resolved"} onClick={handleReopen}>
+                                    <Button  variant="primary" type="button" disabled={ticket.status!="Resolved"} onClick={showPopup}>
                                         Reopen Ticket
                                     </Button>
                                 }
@@ -243,6 +246,20 @@ function TicketDetails() {
                         </Col>
                     </Row>
                 </Container>
+                <Modal show={show} onHide={closePopup}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Reopen Ticket?</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>Click Confirm to reopen the ticket.</Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="btn-outline-primary" onClick={closePopup}>
+                            Cancel
+                        </Button>
+                        <Button variant="primary" onClick={handleReopen}>
+                            Confirm
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
                 <br/><br/><br/><br/><br/>
                 <Footer/>
             </div>)}  

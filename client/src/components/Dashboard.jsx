@@ -8,10 +8,12 @@ import './Style.css'
 
 function Dashboard() {
    
-    const ticketsURL = "http://localhost:3000/api/alltickets"
+    const ticketsURL = "http://localhost:3000/api/allTickets"
     const userURL = "http://localhost:3000/api/user"
 
     const navigate = useNavigate()
+    const handleClose = () => setShow(false);
+    const toggleShow = () => setShow((s) => !s);
 
     const [user, setUser] = useState({});
     const [tickets, setTickets] = useState([]);
@@ -26,8 +28,7 @@ function Dashboard() {
     const [show, setShow] = useState(false);
     const [sort, setSort] = useState("")
 
-    const handleClose = () => setShow(false);
-    const toggleShow = () => setShow((s) => !s);
+
     
     const onSubmit = async () => {
         navigate("/CreateTicket")
@@ -38,9 +39,17 @@ function Dashboard() {
     
     useEffect(()=>{
         
-        if(!token || token == "undefined"){
-            navigate('/')
+        const checkToken = async ()=>{
+
+            const decodedToken = jwtDecode(token)
+            const currentTime = Date.now() / 1000;
+
+            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+                sessionStorage.removeItem("token")
+                navigate('/') 
+            }
         }
+        checkToken()   
 
         const getUser = async ()=>{
             try{
@@ -81,13 +90,6 @@ function Dashboard() {
 
         
     },[user])    
-
-    useEffect(()=>{
-        console.log(loading)
-        console.log(user)
-        console.log(tickets)
-        console.log(filteredList)
-    },[loading])
     
     useEffect(()=>{
 
@@ -127,8 +129,6 @@ function Dashboard() {
         const SortList = async () => {
         
             let list = filteredList
-            console.log(sort)
-
             let sortedList = [];
             let dateObject = "";
             let selection = "";
@@ -162,7 +162,6 @@ function Dashboard() {
                     return setTableList(sortedList);  
                 case 'Date (Newest)':
                     dateObject = "creation"+sort.substring(0,4);
-                    console.log(dateObject)
                     sortedList = [...list].sort((a, b) => {
                         const valA = new Date(a[dateObject]);
                         const valB = new Date(b[dateObject]);

@@ -45,7 +45,6 @@ app.post("/api/auth/register", async (req,res)=>{
             isAdmin = true;
         }
 
-
         let user = await Users.findOne({username})
         let userEmail = await Users.findOne({email})
 
@@ -74,7 +73,7 @@ const verifyToken =(req,res,next)=>{
     next()
 }
 
-app.post("/api/createTicket", verifyToken, async (req,res)=>{
+app.post("/api/newTicket", verifyToken, async (req,res)=>{
 
     const {title, author, assigned, description} = req.body
     
@@ -86,7 +85,6 @@ app.post("/api/createTicket", verifyToken, async (req,res)=>{
     const log = {action: "Ticket Creation",author,comment,date: creationDate}
     const logs = [log]
 
-
     const numberTickets = await Tickets.countDocuments({})
     const ticketNumber =  "TA-" + (numberTickets+1).toString().padStart(8,"0") 
 
@@ -95,8 +93,7 @@ app.post("/api/createTicket", verifyToken, async (req,res)=>{
         console.log(ticket)
         ticket.save()
 
-        const token = await jwt.sign({id:ticket._id},process.env.JWT_SECRET,{expiresIn:"1h"})
-        res.status(200).json({id:ticket._id,token})
+        res.status(200).json({id:ticket._id})
     }
     catch(err){console.log(err)}    
 })
@@ -104,7 +101,7 @@ app.post("/api/createTicket", verifyToken, async (req,res)=>{
 app.get("/api/allUsers",verifyToken, async (req,res)=>{
 
     try{
-        const users = await Users.find({})
+        const users = await Users.find({}).select("-password")
         console.log(users)
         return res.status(200).json(users)
     }
@@ -133,7 +130,18 @@ app.get("/api/user", verifyToken, async (req,res)=>{
     catch(err){console.log(err)}   
 })
 
-app.get("/api/view/:ticketID", verifyToken, async (req,res)=>{
+app.get("/api/users/:userID", verifyToken, async (req,res)=>{
+
+    try{
+        const userID = req.params.userID
+        const user = await Users.findOne({_id:userID}).select("-password")
+        console.log(user)
+        return res.status(200).json({"userData":JSON.stringify(user)})
+    }
+    catch(err){console.log(err)}   
+})
+
+app.get("/api/tickets/:ticketID", verifyToken, async (req,res)=>{
 
     try {
         const ticketID = req.params.ticketID

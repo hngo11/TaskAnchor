@@ -1,4 +1,4 @@
-import { Container, Form, Navbar, Nav, Col, Row, Card, Button } from 'react-bootstrap';
+import { Container, Form, Navbar, Nav, Row, Card, Button } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Logo from "../assets/anchor-svgrepo-com.svg"

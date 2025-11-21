@@ -1,4 +1,4 @@
-import { Container, Form, Navbar, Row, Button, Spinner } from 'react-bootstrap';
+import { Container, Form, Row, Button, Spinner } from 'react-bootstrap';
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
@@ -7,7 +7,7 @@ import Footer from './Footer.jsx';
 
 function ResolveTicket() {
 
-    const ticketURL = "http://localhost:3000/api/view/"
+    const ticketURL = "http://localhost:3000/api/tickets/"
     const updateURL = "http://localhost:3000/api/update/"
 
     const navigate = useNavigate()
@@ -28,13 +28,21 @@ function ResolveTicket() {
     
     useEffect(()=>{
 
-        if(token && token != "undefined"){
-             setUser(jwtDecode(token))
-        }
-        else {
-            navigate('/')
-        }
+        const checkToken = async ()=>{
 
+            const decodedToken = jwtDecode(token)
+            const currentTime = Date.now() / 1000;
+
+            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+                sessionStorage.removeItem("token")
+                navigate('/') 
+            }
+            else {
+                setUser(decodedToken)
+            }
+        }
+        checkToken() 
+          
         const getTicket = async ()=>{
             try{
                 const response = await fetch(ticketURL+ticketID,{

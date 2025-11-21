@@ -7,9 +7,9 @@ import Footer from './Footer.jsx';
 
 function Assign() {
 
-    const ticketURL = "http://localhost:3000/api/view/"
+    const ticketURL = "http://localhost:3000/api/tickets/"
     const updateURL = "http://localhost:3000/api/update/"
-    const userURL = "http://localhost:3000/api/allusers"
+    const userURL = "http://localhost:3000/api/allUsers"
     
     const navigate = useNavigate()
 
@@ -29,14 +29,22 @@ function Assign() {
         navigate(-1)
     }
 
-     useEffect(()=>{
+    useEffect(()=>{
 
-        if(token && token != "undefined"){
-             setUser(jwtDecode(token))
+        const checkToken = async ()=>{
+
+            const decodedToken = jwtDecode(token)
+            const currentTime = Date.now() / 1000;
+
+            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+                sessionStorage.removeItem("token")
+                navigate('/') 
+            }
+            else {
+                setUser(decodedToken)
+            }
         }
-        else {
-            navigate('/')
-        }
+        checkToken()   
 
         const getTicket = async ()=>{
             try{
@@ -77,7 +85,7 @@ function Assign() {
         }
         getUsers()
   
-    },[ticket])
+    },[firstLoading])
 
     const onSubmit = async (event) => {
 

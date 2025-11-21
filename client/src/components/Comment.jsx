@@ -7,7 +7,7 @@ import Footer from './Footer.jsx';
 
 function Comment() {
 
-    const ticketURL = "http://localhost:3000/api/view/"
+    const ticketURL = "http://localhost:3000/api/tickets/"
     const updateURL = "http://localhost:3000/api/update/"
     
     const navigate = useNavigate()
@@ -28,12 +28,20 @@ function Comment() {
     
      useEffect(()=>{
 
-        if(token && token != "undefined"){
-             setUser(jwtDecode(token))
+        const checkToken = async ()=>{
+
+            const decodedToken = jwtDecode(token)
+            const currentTime = Date.now() / 1000;
+
+            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+                sessionStorage.removeItem("token")
+                navigate('/') 
+            }
+            else {
+                setUser(decodedToken)
+            }
         }
-        else {
-            navigate('/')
-        }
+        checkToken()   
 
         const getTicket = async ()=>{
             try{

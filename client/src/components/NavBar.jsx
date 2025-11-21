@@ -1,5 +1,6 @@
 import { Container, Navbar, Nav } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import Logo from "../assets/anchor-svgrepo-com.svg"
 import './Style.css'
 
@@ -15,12 +16,17 @@ function NavBar() {
         { label: 'Create Ticket', path: '/CreateTicket' }
     ];
 
-     const onHome = () => {
-        if (token) {
-            navigate('/Dashboard')
+    const onHome = () => {
+
+        const decodedToken = jwtDecode(token)
+        const currentTime = Date.now() / 1000;
+
+        if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+            sessionStorage.removeItem("token")
+            navigate('/') 
         }
         else {
-            navigate('/')
+            navigate('/Dashboard')
         }
     };
 
