@@ -10,7 +10,7 @@ import LogCard from './LogCard.jsx';
 function TicketDetails() {
 
     const ticketURL = "http://localhost:3000/api/view/"
-    const userURL = "http://localhost:3000/api/users/"
+    const userURL = "http://localhost:3000/api/user"
     const updateURL = "http://localhost:3000/api/update/"
 
     const navigate = useNavigate()
@@ -25,15 +25,17 @@ function TicketDetails() {
     
     useEffect(()=>{
 
-        let userID = ""
-        
-        if(token && token != "undefined"){
-            userID = jwtDecode(token).id
+        if(!token || token == "undefined"){
+            navigate('/')
         }
 
-        const getUser = async ()=>{
+       const getUser = async ()=>{
             try{
-                const response = await fetch(userURL+userID)
+                const response = await fetch(userURL,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                })
                 const data = await response.json()
                 setUser(JSON.parse(data.userData))
             }
@@ -49,7 +51,11 @@ function TicketDetails() {
 
         const getTicket = async ()=>{
             try{
-                const response = await fetch(ticketURL+ticketID)
+                const response = await fetch(ticketURL+ticketID,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                })
                 const data = await response.json()
                 setTicket(JSON.parse(data.ticketData))
             }
@@ -66,7 +72,6 @@ function TicketDetails() {
         console.log(loading)
         console.log(user)
         console.log(ticket)
-        console.log(ticketID)
     },[loading])
 
     const handleReopen = async () => {
@@ -83,7 +88,8 @@ function TicketDetails() {
         try {  
             const response = await fetch(updateURL+ticketID, {
             method: 'PATCH',
-            headers: {'Content-Type': 'application/json'},
+            headers: {'Content-Type': 'application/json',
+                    "authorization": `Bearer ${token}`},
             body: JSON.stringify({resolutionDate,logs,status}),
             });
             const data = await response.json()

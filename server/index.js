@@ -50,8 +50,9 @@ app.post("/api/auth/register", async (req,res)=>{
         let userEmail = await Users.findOne({email})
 
         if(user) return res.status(401).json({"msg":"Username already exists"})
-        if(userEmail) return res.status(401).json({"msg":"Account exists with this email"})    
-        const passwordHash = await bcrypt.hash(password, 10)
+        if(userEmail) return res.status(401).json({"msg":"Account exists with this email"})
+        const salt = await bcrypt.genSalt(8)    
+        const passwordHash = await bcrypt.hash(password, salt)
         user = new Users({EmployeeID,username,email,password:passwordHash,isAdmin})
         user.save()
 
@@ -61,7 +62,20 @@ app.post("/api/auth/register", async (req,res)=>{
     catch(err){console.log(err)}
 })
 
-app.post("/api/createTicket", async (req,res)=>{
+const verifyToken =(req,res,next)=>{
+    
+    const authorizationHeader = req.headers.authorization;
+    
+    if(!authorizationHeader|| !authorizationHeader.startsWith("Bearer ")) return res.status(401).json({"msg":"No token found"})
+    const token = authorizationHeader.split(" ")[1];
+    const decodedToken = jwt.verify(token,process.env.JWT_SECRET)
+    req.user=decodedToken
+    
+    next()
+}
+
+app.post("/api/createTicket", verifyToken, async (req,res)=>{
+
     const {title, author, assigned, description} = req.body
     
     const creationDate = new Date().toString()
@@ -77,7 +91,6 @@ app.post("/api/createTicket", async (req,res)=>{
     const ticketNumber =  "TA-" + (numberTickets+1).toString().padStart(8,"0") 
 
     try{
-        
         let ticket = new Tickets({ticketNumber, title, author, creationDate, resolutionDate, assigned, status, description, logs})
         console.log(ticket)
         ticket.save()
@@ -88,7 +101,7 @@ app.post("/api/createTicket", async (req,res)=>{
     catch(err){console.log(err)}    
 })
 
-app.get("/api/allUsers", async (req,res)=>{
+app.get("/api/allUsers",verifyToken, async (req,res)=>{
 
     try{
         const users = await Users.find({})
@@ -98,7 +111,7 @@ app.get("/api/allUsers", async (req,res)=>{
     catch(err){console.log(err)}   
 })
 
-app.get("/api/allTickets", async (req,res)=>{
+app.get("/api/allTickets", verifyToken, async (req,res)=>{
 
     try{
         const tickets = await Tickets.find({})
@@ -109,18 +122,18 @@ app.get("/api/allTickets", async (req,res)=>{
 
 })
 
-app.get("/api/users/:userID", async (req,res)=>{
+app.get("/api/user", verifyToken, async (req,res)=>{
 
     try{
-        const userID = req.params.userID
-        const user = await Users.findOne({_id:userID})
+       
+        const user = await Users.findOne({_id:req.user.id}).select("-password")
         console.log(user)
         return res.status(200).json({"userData":JSON.stringify(user)})
     }
     catch(err){console.log(err)}   
 })
 
-app.get("/api/view/:ticketID", async (req,res)=>{
+app.get("/api/view/:ticketID", verifyToken, async (req,res)=>{
 
     try {
         const ticketID = req.params.ticketID
@@ -131,7 +144,7 @@ app.get("/api/view/:ticketID", async (req,res)=>{
     catch(err){console.log(err)}
 })
 
-app.patch("/api/update/:ticketID", async (req, res) => {
+app.patch("/api/update/:ticketID", verifyToken, async (req, res) => {
     try {
 
         const updateFields = req.body

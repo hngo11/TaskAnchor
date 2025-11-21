@@ -14,18 +14,23 @@ function Register() {
     const [email,setEmail] = useState("")
     const [password,setPassword] = useState("")
     const [validated, setValidated] = useState(false)
-    
-    const onsubmit = async (event)=>{
 
-        const form = event.currentTarget;
-        console.log(form.checkValidity())
-        if (form.checkValidity() === false) {
-        
+    const oncancel = async () => {
+        navigate(-1)
+    }
+
+    const onSubmit = async (event)=>{
+
         event.preventDefault();
         event.stopPropagation();
+        
+        const form = event.currentTarget;
+
+        if (form.checkValidity() === false) {
+            setValidated(true);
         }
         else {
-            setValidated(true);
+            
             try{
                 let response = await fetch(URL,{
                     method:"POST",
@@ -45,10 +50,6 @@ function Register() {
             }
             catch(err){console.log(err)}
         } 
-    }
-
-    const oncancel = async (event) => {
-        navigate(-1)
     }
 
 
@@ -74,7 +75,7 @@ function Register() {
                     <Card.Header className="fs-5 fw-bold" style={{ backgroundColor: '#80E6FF' }}>New Account Registration</Card.Header>
                     <Card.Body>
                         <Container >
-                            <Form noValidate validated={validated} onSubmit={onsubmit}>
+                            <Form noValidate validated={validated} onSubmit={onSubmit}>
                                 <Form.Group  as={Row} className="mb-3" controlId="formGridUsername">
                                     <Form.Label>Create a Username</Form.Label>
                                     <Form.Control
@@ -109,12 +110,13 @@ function Register() {
                                         type="password" 
                                         value={password}
                                         onChange={(e)=>setPassword(e.target.value)}
-                                        placeholder="Create Your Password" />
+                                        minLength={6}
+                                        placeholder="Minimum length of 6 characters" />
                                     <Form.Control.Feedback type="invalid">
-                                    Please enter a valid password.
+                                    Password must be at least 6 Characters.
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Button className="mt-3" variant="primary" type="button" onClick={onsubmit}>
+                                <Button className="mt-3" type="submit">
                                     Submit
                                 </Button>
                                 <Button className="mt-3 mx-4 btn-outline-primary" variant="secondary" type="button" onClick={oncancel}>

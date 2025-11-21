@@ -16,9 +16,11 @@ function Comment() {
     const [ticket, setTicket] = useState([]);
     const [comment, setComment] = useState("")
     const [loading, setLoading] = useState(true)
+    const [validated, setValidated] = useState(false)
     const {ticketID} = useParams()
 
     const token = sessionStorage.getItem("token")
+
     
     const onCancel = async () => {
         navigate(-1)
@@ -35,7 +37,11 @@ function Comment() {
 
         const getTicket = async ()=>{
             try{
-                const response = await fetch(ticketURL+ticketID)
+                const response = await fetch(ticketURL+ticketID,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                })
                 const data = await response.json()
                 setTicket(JSON.parse(data.ticketData))
             }
@@ -48,35 +54,45 @@ function Comment() {
 
      },[])     
 
-    const onSubmit = async () => {
+    const onSubmit = async (event) => {
     
-        const author = user.user   
-        const action = "Log"
-        const date = new Date().toString()
-        const log = {action,author,comment,date}
-        const logs = [...ticket.logs,log]
+        event.preventDefault();
+		event.stopPropagation();
 
-        let status = ticket.status
-        if (status !== "Resolved")
-            status =  "In Progress"
+        const form = event.currentTarget;
 
+		if (form.checkValidity() === false) {	
+            setValidated(true);
+		}
+        else {
+            const author = user.user   
+            const action = "Log"
+            const date = new Date().toString()
+            const log = {action,author,comment,date}
+            const logs = [...ticket.logs,log]
 
+            let status = ticket.status
+            if (status !== "Resolved")
+                status =  "In Progress"
 
-        try {  
-            const response = await fetch(updateURL+ticketID, {
-                method: 'PATCH',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({logs, status}),
-            });
-            const data = await response.json()
-            if(response.ok){
-                navigate(-1)
+            try {  
+                const response = await fetch(updateURL+ticketID, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json',
+                            "authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({logs, status}),
+                });
+                const data = await response.json()
+                if(response.ok){
+                    navigate(-1)
+                }
+                else{
+                    alert(data.msg || "Update unsuccessful")
+                }
             }
-            else{
-                alert(data.msg || "Update unsuccessful")
-            }
+            catch(err){console.log(err)}
         }
-        catch(err){console.log(err)}
     }
 
 
@@ -91,7 +107,7 @@ function Comment() {
             <div className="page-background d-flex flex-column min-vh-100 text-black">
                 <NavBar/>
                 <Container className="flex-grow-1 mt-3">
-                    <Form onSubmit={onSubmit}>
+                    <Form noValidate validated={validated} onSubmit={onSubmit}>
                         <Row>
                             <div className="my-4 pb-2 border-bottom">
                                 <h2>Update Log</h2>
@@ -118,7 +134,7 @@ function Comment() {
                         <Button className="mt-3 mx-4 btn-outline-primary" variant="secondary" type="button" onClick={onCancel}>
                             Cancel
                         </Button>
-                        <Button className="mt-3 mx-3" variant="primary" type="button" onClick={onSubmit}>
+                        <Button className="mt-3 mx-3" type="submit">
                             Update
                         </Button> 
                     </Form>  

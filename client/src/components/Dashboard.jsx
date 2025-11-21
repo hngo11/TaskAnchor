@@ -9,7 +9,7 @@ import './Style.css'
 function Dashboard() {
    
     const ticketsURL = "http://localhost:3000/api/alltickets"
-    const userURL = "http://localhost:3000/api/users/"
+    const userURL = "http://localhost:3000/api/user"
 
     const navigate = useNavigate()
 
@@ -37,19 +37,18 @@ function Dashboard() {
 
     
     useEffect(()=>{
-
-        let userID
         
-        if(token && token != "undefined"){
-            userID = jwtDecode(token).id
-        }
-        else {
+        if(!token || token == "undefined"){
             navigate('/')
         }
 
         const getUser = async ()=>{
             try{
-                const response = await fetch(userURL+userID)
+                const response = await fetch(userURL,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                })
                 const data = await response.json()
                 setUser(JSON.parse(data.userData))
             }
@@ -63,7 +62,11 @@ function Dashboard() {
       
         const getTickets = async ()=>{
             try{
-                const response = await fetch(ticketsURL)
+                const response = await fetch(ticketsURL,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                })
                 const data = await response.json()
                 setTickets(data)
                 setFilteredList(data)
@@ -225,7 +228,7 @@ function Dashboard() {
                     </Col>
                     <Col className="d-flex align-items-center">
                     <Container className="d-flex justify-content-end align-items-center">
-                        <Button variant="primary" type="button" onClick={onSubmit}>
+                        <Button type="button" onClick={onSubmit}>
                             Open New Ticket
                         </Button> 
                     </Container>
@@ -235,7 +238,7 @@ function Dashboard() {
                 <Row>
                     <Col className="d-flex align-items-center">
                         <Container>
-                            <Button variant="primary" onClick={toggleShow} className="me-2">
+                            <Button onClick={toggleShow} className="me-2">
                                 Advanced Filters
                             </Button>
                         </Container>                           
@@ -296,7 +299,7 @@ function Dashboard() {
                                     </Form.Select>
                                 </Form.Group>  
                                 <br/>            
-                                <Button variant="primary" onClick={handleFilter}  className="me-2">
+                                <Button onClick={handleFilter}  className="me-2">
                                     Update Search
                                 </Button>
                                  <Button variant="tertiary" onClick={handleClearFilter}  className="me-2">

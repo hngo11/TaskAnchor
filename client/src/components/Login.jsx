@@ -17,15 +17,16 @@ function Login() {
 
     const onSubmit = async (event)=>{
       
-		const form = event.currentTarget;
+        event.preventDefault();
+		event.stopPropagation();
+
+        const form = event.currentTarget;
 		
 		if (form.checkValidity() === false) {
-			event.preventDefault();
-			event.stopPropagation();
+			setValidated(true);
 		}
 		else {
-			setValidated(true);
-
+		
 			try{
 				let response = await fetch(URL,{
 					method:"POST",
@@ -72,7 +73,7 @@ function Login() {
 					<Card.Header className="fs-4 fw-bold" style={{ backgroundColor: '#80E6FF' }} >Account Login</Card.Header>
 					<Card.Body>
 						<Container>
-							<Form noValidate validated={validated} onSubmit={onsubmit}>
+							<Form noValidate validated={validated} onSubmit={onSubmit}>
 								<Form.Group  as={Row} className="mb-3" controlId="formGridUsername">
 								<Form.Label className="text-black">Username</Form.Label>
 								<Form.Control 
@@ -99,7 +100,7 @@ function Login() {
 									Cannot be empty.
 								</Form.Control.Feedback>
 								</Form.Group>
-								<Button className="mt-3" variant="primary" type="button" onClick={onSubmit}>
+								<Button className="mt-3" type="submit">
 									Login
 								</Button>
 								<Nav.Link className="text-black mt-3" href="/Register">Not Signed up? <u>Create Account</u></Nav.Link>

@@ -19,6 +19,7 @@ function Assign() {
     const [firstLoading, setFirstLoading] = useState(true)
     const [secondLoading, setSecondLoading] = useState(true)
     const [ticket, setTicket] = useState()
+    const [validated, setValidated] = useState(false)
     const {ticketID} = useParams()
     
     const token = sessionStorage.getItem("token")
@@ -39,7 +40,11 @@ function Assign() {
 
         const getTicket = async ()=>{
             try{
-                const response = await fetch(ticketURL+ticketID)
+                const response = await fetch(ticketURL+ticketID,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                })
                 const data = await response.json()
                 setTicket(JSON.parse(data.ticketData))
             }
@@ -56,7 +61,11 @@ function Assign() {
 
         const getUsers = async ()=>{
             try{
-                const response = await fetch(userURL)
+                const response = await fetch(userURL,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                })
                 const users = await response.json()
                 const filteredUsers = users.filter(item => item.username !== ticket.assigned)
                 setUsers(filteredUsers) 
@@ -70,39 +79,45 @@ function Assign() {
   
     },[ticket])
 
-    useEffect(()=>{
-        console.log(ticket)
-        console.log(ticketID)
-    },[secondLoading])
+    const onSubmit = async (event) => {
 
-    const onSubmit = async () => {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const form = event.currentTarget;
+		
+		if (form.checkValidity() === false) {	
+            setValidated(true);
+		}
+        else {
     
+            const author = user.user
+            const status = "In Progress"
+            const action = "Reassignment"
+            const comment = `Ticket reassigned to: [${assigned}]`
+            const date = new Date().toString()
+            const log = {action,author,comment,date}
+            const logs = [...ticket.logs,log]
 
-        const author = user.user
-        const status = "In Progress"
-        const action = "Reassignment"
-        const comment = `Ticket reassigned to: [${assigned}]`
-        const date = new Date().toString()
-        const log = {action,author,comment,date}
-        const logs = [...ticket.logs,log]
-
-        try {  
-            const response = await fetch(updateURL+ticketID, {
-                method: 'PATCH',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({assigned, logs, status}),
-            });
-            const data = await response.json()
-            if(response.ok){
-                navigate(-1)
+            try {  
+                const response = await fetch(updateURL+ticketID, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json',
+                            "authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({assigned, logs, status}),
+                });
+                const data = await response.json()
+                if(response.ok){
+                    navigate(-1)
+                }
+                else{
+                    alert(data.msg || "Update unsuccessful")
+                }
             }
-            else{
-                alert(data.msg || "Update unsuccessful")
-            }
+            catch(err){console.log(err)}
         }
-        catch(err){console.log(err)}
     }
-
 
 
     return (<>
@@ -117,7 +132,7 @@ function Assign() {
                 <NavBar/>
                 <br/>
                 <Container className="flex-grow-1">
-                    <Form onSubmit={onSubmit}>
+                    <Form noValidate validated={validated} onSubmit={onSubmit}>
                         <Row>
                             <div className="my-4 pb-2 border-bottom">
                                 <h2>Reassign Ticket</h2>
@@ -135,6 +150,7 @@ function Assign() {
                             <Form.Group className="w-25" controlId="assign">
                                 <Form.Label>Reassign to</Form.Label>
                                 <Form.Select
+                                    required
                                     value={assigned} 
                                     onChange={(e)=>setAssigned(e.target.value)}
                                     aria-label="Default select example">
@@ -144,7 +160,10 @@ function Assign() {
                                             {user.username}
                                         </option>
                                     ))} 
-                                </Form.Select>         
+                                </Form.Select>
+                                <Form.Control.Feedback type="invalid">
+                                    Cannot be empty.
+                                </Form.Control.Feedback>             
                             </Form.Group>
                         </Row>
                         <br/>
@@ -152,7 +171,7 @@ function Assign() {
                             <Button className="mt-3 mx-4 btn-outline-primary" variant="secondary" type="button" onClick={onCancel}>
                                 Cancel
                             </Button>
-                            <Button className="mt-3 mx-3" variant="primary" type="button" onClick={onSubmit}>
+                            <Button className="mt-3 mx-3" type="submit">
                                 Save Changes
                             </Button>
                         </div>  

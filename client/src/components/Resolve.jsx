@@ -16,11 +16,12 @@ function ResolveTicket() {
     const [ticket, setTicket] = useState()
     const [userComment, setUserComment] = useState("")
     const [loading, setLoading] = useState(true)
+    const [validated, setValidated] = useState(false)
     const {ticketID} = useParams()
 
     const token = sessionStorage.getItem("token")
-  
 
+    
     const onCancel = async () => {
         navigate(-1)
     }
@@ -36,7 +37,11 @@ function ResolveTicket() {
 
         const getTicket = async ()=>{
             try{
-                const response = await fetch(ticketURL+ticketID)
+                const response = await fetch(ticketURL+ticketID,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                })
                 const data = await response.json()
                 setTicket(JSON.parse(data.ticketData))
             }
@@ -49,34 +54,46 @@ function ResolveTicket() {
 
     },[])   
 
-   const onSubmit = async () => {
+   const onSubmit = async (event) => {
 
-        const author = user.user   
-        const status = "Resolved"
-        const action = "Resolution"
-        const comment = `${userComment}\n\nTicket closed.`
-        const date = new Date().toString()
-        const resolutionDate = date
-        const log = {action,author,comment,date}
-        const logs = [...ticket.logs,log]
+        event.preventDefault();
+		event.stopPropagation();
 
-    try {  
-        const response = await fetch(updateURL+ticketID, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({resolutionDate,logs,status}),
-      });
-        const data = await response.json()
-        if(response.ok){
-          navigate(-1)
+        const form = event.currentTarget;
+		
+		if (form.checkValidity() === false) {	
+            setValidated(true);
+		}
+        else {
+
+            const author = user.user   
+            const status = "Resolved"
+            const action = "Resolution"
+            const comment = `${userComment}\n\nTicket closed.`
+            const date = new Date().toString()
+            const resolutionDate = date
+            const log = {action,author,comment,date}
+            const logs = [...ticket.logs,log]
+
+        try {  
+            const response = await fetch(updateURL+ticketID, {
+                method: 'PATCH',
+                headers: {
+                'Content-Type': 'application/json',
+                "authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({resolutionDate,logs,status}),
+            });
+            const data = await response.json()
+            if(response.ok){
+            navigate(-1)
+            }
+            else{
+            alert(data.msg || "Update unsuccessful")
+            }
         }
-        else{
-          alert(data.msg || "Update unsuccessful")
-        }
-      }
-      catch(err){console.log(err)}
+        catch(err){console.log(err)}
+    }
   }
 
 
@@ -95,7 +112,7 @@ function ResolveTicket() {
                         <h2>Ticket Resolution</h2>
                     </div>
                     <br/>
-                    <Form onSubmit={onSubmit}>    
+                    <Form noValidate validated={validated} onSubmit={onSubmit}>    
                         <Row>  
                             <Form.Group className="w-50" controlId="Comment">
                                 <Form.Label>Resolution</Form.Label>
@@ -116,7 +133,7 @@ function ResolveTicket() {
                         <Button className="mt-3 mx-4 btn-outline-primary" variant="secondary" type="button" onClick={onCancel}>
                             Cancel
                         </Button>
-                        <Button className="mt-3 mx-3" variant="primary" type="button" onClick={onSubmit}>
+                        <Button className="mt-3 mx-3" type="submit">
                             Close Ticket
                         </Button> 
                     </Form>  

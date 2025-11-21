@@ -7,7 +7,7 @@ import Footer from './Footer.jsx';
 
 function CreateTicket() {
 
-    const URL = "http://localhost:3000/api/createTicket"
+    const createURL = "http://localhost:3000/api/createTicket"
     const userURL = "http://localhost:3000/api/allusers"
 
     const navigate = useNavigate()
@@ -18,6 +18,7 @@ function CreateTicket() {
     const [assigned, setAssigned] = useState("")
     const [description, setDescription] = useState("")
     const [loading, setLoading] = useState(true)
+    const [validated, setValidated] = useState(false)
 
     const token = sessionStorage.getItem("token")
 
@@ -37,7 +38,11 @@ function CreateTicket() {
 
         const getUsers = async ()=>{
             try{
-                const response = await fetch(userURL)
+                const response = await fetch(userURL,{
+                    headers:{
+                        "authorization": `Bearer ${token}`
+                    }
+                }) 
                 const users = await response.json()
                 setUsers(users)   
             }
@@ -50,32 +55,41 @@ function CreateTicket() {
 
     },[]) 
 
-    const onSubmit = async () => {
+    const onSubmit = async (event) => {
     
-        let author = user.user
+        event.preventDefault();
+		event.stopPropagation();
+
+        const form = event.currentTarget;
+		
+		if (form.checkValidity() === false) {	
+            setValidated(true);
+		}
+        else {
+
+            const author = user.user 
         
-        if (assigned == null) {
-            setAssigned(author)
-        }
-
-        try{
-            let response = await fetch(URL,{
-                method:"POST",
-                headers:{"content-type":"application/json"},
-                body:JSON.stringify({title, author, assigned, description})
-            })
-            const data = await response.json()
-            if(response.ok){
-                navigate("/Dashboard")
+            try{
+                let response = await fetch(createURL,{
+                    method:"POST",
+                    headers:{"content-type":"application/json",
+                            "authorization": `Bearer ${token}`,
+                    },
+                    body:JSON.stringify({title, author, assigned, description})
+                })
+                const data = await response.json()
+                console.log(response.ok)
+                if(response.ok){
+                    navigate("/Dashboard")
+                }
+                else{
+                    alert(data.msg || "Issue Creation failed!")
+                }
             }
-            else{
-                alert(data.msg || "Issue Creation failed!")
-            }
+            catch(err)
+            {console.log(err)}
         }
-        catch(err)
-        {console.log(err)}
     }
-
 
     return (<>
         {loading?(
@@ -88,7 +102,7 @@ function CreateTicket() {
             <div className="page-background d-flex flex-column min-vh-100 text-black">
                 <NavBar/>   
                 <Container className="flex-grow-1 mt-3">
-                    <Form onSubmit={onSubmit}>
+                    <Form noValidate validated={validated} onSubmit={onSubmit}>
                         <Row>
                             <div className="my-4 pb-2 border-bottom">
                                 <h2>New Ticket Creation</h2>
@@ -99,12 +113,12 @@ function CreateTicket() {
                             <Form.Group className="w-25" controlId="name">
                                 <Form.Label>Issue Name</Form.Label>
                                 <Form.Control
-                                required
-                                className='border border-dark border-1'
-                                type="text" 
-                                value={title}
-                                onChange={(e)=>setTitle(e.target.value)}
-                                placeholder="Subject"/>
+                                    required
+                                    className='border border-dark border-1'
+                                    type="text" 
+                                    value={title}
+                                    onChange={(e)=>setTitle(e.target.value)}
+                                    placeholder="Subject"/>
                                 <Form.Control.Feedback type="invalid">
                                     Cannot be empty.
                                 </Form.Control.Feedback>                   
@@ -113,6 +127,7 @@ function CreateTicket() {
                                 <Form.Label>Assign to</Form.Label>
                                 <Row>
                                     <Form.Select
+                                        required
                                         value={assigned} 
                                         onChange={(e)=>setAssigned(e.target.value)}
                                         aria-label="Default select example">
@@ -122,7 +137,10 @@ function CreateTicket() {
                                                 {user.username}
                                             </option>
                                             ))} 
-                                    </Form.Select>         
+                                    </Form.Select>
+                                    <Form.Control.Feedback type="invalid">
+                                    Cannot be empty.
+                                </Form.Control.Feedback>          
                                 </Row>
                             </Form.Group>
                         </Row>
@@ -147,7 +165,7 @@ function CreateTicket() {
                         <Button className="mt-3 mx-4 btn-outline-primary" variant="secondary" type="button" onClick={onCancel}>
                             Cancel
                         </Button>
-                        <Button className="mt-3 mx-3" variant="primary" type="button" onClick={onSubmit}>
+                        <Button className="mt-3 mx-3" type="submit">
                             Submit
                         </Button> 
                     </Form>  
