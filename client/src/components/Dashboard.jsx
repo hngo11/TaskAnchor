@@ -95,30 +95,30 @@ function Dashboard() {
 
         const FilterList = async () => {
             
-            let filter = tickets
+            let list = tickets
 
             if (ticketNumFilter !== '') {
-                filter = filter.filter(item =>
+                list = list.filter(item =>
                     item.ticketNumber.toLowerCase().includes(ticketNumFilter.toLowerCase()));
             }        
             if (titleFilter !== '') {
-                filter = filter.filter(item =>
+                list = list.filter(item =>
                     item.title.toLowerCase().includes(titleFilter.toLowerCase()));
             }
             if (assignedFilter !== '') {
-                filter = filter.filter(item =>
+                list = list.filter(item =>
                     item.assigned.toLowerCase().includes(assignedFilter.toLowerCase()));
             }
             if (statusFilter !== '') {
-                filter = filter.filter(item =>
+                list = list.filter(item =>
                     item.status.toLowerCase().includes(statusFilter.toLowerCase()));
             }
 
             handleClose()
             setSort("")
             setFilterButton(false)
-            setFilteredList(filter)
-            setTableList(filter)
+            setFilteredList(list)
+            setTableList(list)
         }
         FilterList()
 

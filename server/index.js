@@ -10,8 +10,15 @@ const Tickets = require("./model/Tickets")
 
 dotenv.config()
 const app = express()
+
+const corsOptions = {
+  origin: ['http://localhost:'+process.env.PORT, "http://localhost:5173"],
+  methods: 'GET,PATCH,POST',
+  credentials: true,
+};
+
 app.use(express.json({limit:'5mb'}))
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.post("/api/auth/login", async (req,res)=>{
     const {username, password} = req.body
