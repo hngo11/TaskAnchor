@@ -41,13 +41,19 @@ function Dashboard() {
         
         const checkToken = async ()=>{
 
-            const decodedToken = jwtDecode(token)
-            const currentTime = Date.now() / 1000;
-
-            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+            if(!token || token === null){
                 sessionStorage.removeItem("token")
                 navigate('/') 
             }
+            else {
+                const decodedToken = jwtDecode(token)
+                const currentTime = Date.now() / 1000;
+
+                if (decodedToken.exp < currentTime) {
+                    sessionStorage.removeItem("token")
+                    navigate('/')   
+                }
+            }    
         }
         checkToken()   
 
@@ -229,7 +235,7 @@ function Dashboard() {
                     <Container className="d-flex justify-content-end align-items-center">
                         <Button type="button" onClick={onSubmit}>
                             Open New Ticket
-                        </Button> 
+                        </Button>
                     </Container>
                     </Col>  
                 </Row>
@@ -240,6 +246,12 @@ function Dashboard() {
                             <Button onClick={toggleShow} className="me-2">
                                 Advanced Filters
                             </Button>
+                            {/* Feature to put Clear button on dashboard */}
+                            {/* {(ticketNumFilter !="" || titleFilter !="" || assignedFilter !="" || (statusFilter !="")) &&
+                                <Button variant="tertiary" onClick={handleClearFilter}  className="me-2">
+                                    Clear All Filters
+                                </Button>
+                            } */}
                         </Container>                           
                     </Col>
                     <Col className="d-flex align-items-end">
@@ -268,7 +280,7 @@ function Dashboard() {
                         </Offcanvas.Header>
                         <Offcanvas.Body>
                             <Form>
-                                <Form.Group className=" w-50" controlId="Title">
+                                <Form.Group className=" w-50 mb-2" controlId="Title">
                                     <Form.Label> Ticket Title:</Form.Label>
                                     <Form.Control
                                         type="text" 
@@ -276,8 +288,7 @@ function Dashboard() {
                                         value={titleFilter}
                                         onChange={(e)=>setTitleFilter(e.target.value)}/>  
                                 </Form.Group>
-                                <br/>
-                                <Form.Group className=" w-50" controlId="Assigned">
+                                <Form.Group className=" w-50 mb-2" controlId="Assigned">
                                     <Form.Label> Currently Assigned:</Form.Label>
                                     <Form.Control
                                         type="text" 
@@ -285,7 +296,7 @@ function Dashboard() {
                                         value={assignedFilter}
                                         onChange={(e)=>setAssignedFilter(e.target.value)}/>  
                                 </Form.Group>
-                                <Form.Group className=" w-50" controlId="Status">
+                                <Form.Group className=" w-50 mb-2" controlId="Status">
                                         <Form.Label>Ticket Status</Form.Label>
                                     <Form.Select
                                         value={statusFilter}
@@ -301,7 +312,7 @@ function Dashboard() {
                                 <Button onClick={handleFilter}  className="me-2">
                                     Update Search
                                 </Button>
-                                 <Button variant="tertiary" onClick={handleClearFilter}  className="me-2">
+                                <Button variant="tertiary" onClick={handleClearFilter}  className="me-2">
                                     Clear All Filters
                                 </Button>
                             </Form>

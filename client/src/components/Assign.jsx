@@ -33,16 +33,22 @@ function Assign() {
 
         const checkToken = async ()=>{
 
-            const decodedToken = jwtDecode(token)
-            const currentTime = Date.now() / 1000;
-
-            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+            if(!token || token === null){
                 sessionStorage.removeItem("token")
                 navigate('/') 
             }
             else {
-                setUser(decodedToken)
-            }
+                const decodedToken = jwtDecode(token)
+                const currentTime = Date.now() / 1000;
+
+                if (decodedToken.exp < currentTime) {
+                    sessionStorage.removeItem("token")
+                    navigate('/')   
+                }
+                else {
+                    setUser(decodedToken)
+                }
+            }  
         }
         checkToken()   
 

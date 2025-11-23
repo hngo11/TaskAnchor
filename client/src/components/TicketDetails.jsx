@@ -30,13 +30,20 @@ function TicketDetails() {
 
         const checkToken = async ()=>{
 
-            const decodedToken = jwtDecode(token)
-            const currentTime = Date.now() / 1000;
-
-            if(!token || token === "undefined" || decodedToken.exp < currentTime ){
+            if(!token || token === null){
                 sessionStorage.removeItem("token")
                 navigate('/') 
             }
+            else {
+                const decodedToken = jwtDecode(token)
+                const currentTime = Date.now() / 1000;
+
+                if (decodedToken.exp < currentTime) {
+                    sessionStorage.removeItem("token")
+                    navigate('/')   
+                }
+            }
+            
         }
         checkToken()   
 
@@ -125,9 +132,20 @@ function TicketDetails() {
                     <Row>
                         <Col md={9}>
                             <Row>
+                                <Form.Group className="w-25" controlId="ID">
+                                        <Form.Label>Ticket ID</Form.Label>
+                                        <Form.Control
+                                            type="text" 
+                                            placeholder={ticket.ticketNumber}
+                                            readOnly = {ticket.status != "Resolved"}
+                                            disabled = {ticket.status == "Resolved"} />  
+                                </Form.Group>
+                            </Row>
+                            <br/>
+                            <Row>
                                 <Col>
                                     <Form.Group controlId="name">
-                                        <Form.Label>Issue Name</Form.Label>
+                                        <Form.Label>Ticket Name</Form.Label>
                                         <Form.Control
                                             type="text" 
                                             placeholder={ticket.title}
@@ -144,6 +162,7 @@ function TicketDetails() {
                                             readOnly = {ticket.status != "Resolved"}
                                             disabled = {ticket.status == "Resolved"} />  
                                     </Form.Group>
+
                                 </Col>
                                 <Col>
                                     <Form.Group controlId="creationdate" >
